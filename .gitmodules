@@ -1,0 +1,3 @@
+[submodule "verilog/rtl/yifive/ycr2c"]
+	path = verilog/rtl/yifive/ycr2c
+	url = https://github.com/dineshannayya/ycr2c.git

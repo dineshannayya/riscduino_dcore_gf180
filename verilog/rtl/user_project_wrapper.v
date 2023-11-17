@@ -33,18 +33,17 @@
 ////      6.  SPI Master (Single)                                                                ////
 ////      7.  TCM SRAM 2KB                                                                       ////
 ////      8.  2KB icache and 2KB dcache                                                          ////
-////      9.  6 Channel ADC (Pending)                                                            ////
-////      10. Pinmux with GPIO and 6 PWM                                                         ////
-////      11. 15 x hardware Semaphore                                                            ////
-////      12. 4 x ws281x driver                                                                  //// 
-////      13. 3 x Hardware Timer                                                                 ////
-////      14. UART Master                                                                        ////
-////      15. SPI Slave (As Arduino ISP)                                                         ////
-////      16. AES 126 Encription/Decryption                                                      ////
-////      17. FPU (Single Precision)                                                             ////
-////      18. RTC                                                                                ////
-////      19. Random Generator                                                                   ////
-////      20. NEC IR Receiver                                                                    ////
+////      9. Pinmux with GPIO and 6 PWM                                                         ////
+////      10. 15 x hardware Semaphore                                                            ////
+////      11. 4 x ws281x driver                                                                  //// 
+////      12. 3 x Hardware Timer                                                                 ////
+////      13. UART Master                                                                        ////
+////      14. SPI Slave (As Arduino ISP)                                                         ////
+////      15. AES 126 Encription/Decryption                                                      ////
+////      16. FPU (Single Precision)                                                             ////
+////      17. RTC                                                                                ////
+////      18. Random Generator                                                                   ////
+////      19. NEC IR Receiver                                                                    ////
 ////      21. NEC IR Transmitter                                                                 ////
 ////                                                                                             ////
 ////  To Do:                                                                                     ////
@@ -468,14 +467,8 @@
 
 module user_project_wrapper (
 `ifdef USE_POWER_PINS
-    inout vdda1,	// User area 1 3.3V supply
-    inout vdda2,	// User area 2 3.3V supply
-    inout vssa1,	// User area 1 analog ground
-    inout vssa2,	// User area 2 analog ground
-    inout vccd1,	// User area 1 1.8V supply
-    inout vccd2,	// User area 2 1.8v supply
-    inout vssd1,	// User area 1 digital ground
-    inout vssd2,	// User area 2 digital ground
+    inout vdd,		// User area 5.0V supply
+    inout vss,		// User area ground
 `endif
     input   wire                       wb_clk_i        ,  // System clock
     input   wire                       user_clock2     ,  // user Clock
@@ -490,16 +483,11 @@ module user_project_wrapper (
     output  wire [WB_WIDTH-1:0]        wbs_dat_o       ,  // data input
     output  wire                       wbs_ack_o       ,  // acknowlegement
 
-    // Analog (direct connection to GPIO pad---use with caution)
-    // Note that analog I/O is not available on the 7 lowest-numbered
-    // GPIO pads, and so the analog_io indexing is offset from the
-    // GPIO indexing by 7 (also upper 2 GPIOs do not have analog_io).
-    inout [28:0] analog_io,
  
     // Logic Analyzer Signals
-    input  wire [127:0]                la_data_in      ,
-    output wire [127:0]                la_data_out     ,
-    input  wire [127:0]                la_oenb         ,
+    input  wire [63:0]                la_data_in      ,
+    output wire [63:0]                la_data_out     ,
+    input  wire [63:0]                la_oenb         ,
  
 
     // IOs
@@ -1940,28 +1928,6 @@ peri_top u_peri(
 
 
 
-//------------------------------------------
-// 4 x 8 bit DAC
-//------------------------------------------
-
-
-dac_top  u_4x8bit_dac(
-`ifdef USE_POWER_PINS
-          .VDDA               (vdda1                        ),
-          .VSSA               (vssa1                        ),
-          .VCCD               (vccd1                        ),
-          .VSSD               (vssd1                        ),
-`endif
-          .VREFH              (analog_io[23]                ),
-          .Din0               (cfg_dac0_mux_sel             ),
-          .Din1               (cfg_dac1_mux_sel             ),
-          .Din2               (cfg_dac2_mux_sel             ),
-          .Din3               (cfg_dac3_mux_sel             ),
-          .VOUT0              (analog_io[15]                ),
-          .VOUT1              (analog_io[16]                ),
-          .VOUT2              (analog_io[17]                ),
-          .VOUT3              (analog_io[18]                )
-   );
 
 
 endmodule : user_project_wrapper
