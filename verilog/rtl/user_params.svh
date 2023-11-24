@@ -136,5 +136,26 @@ system strap decoding
 `define SEL_RTC     4'b1001   // RTC REGISTER
 `define SEL_IR      4'b1010   // IR REGISTER
 `define SEL_SM      4'b1011   // STEPER MOTOR
+
+
+// UART/I2C/SPI Decodeing
+`define SEL_UART0 3'b000
+`define SEL_I2C   3'b001
+`define SEL_USB   3'b010
+`define SEL_SPI   3'b011
+`define SEL_UART1 3'b100
+
+
+//PWM Configuration
+`define RDNO_PWM_ENABLE_0
+`define RDNO_PWM_ENABLE_1
+`define RDNO_PWM_ENABLE_2
+//`define RDNO_PWM_ENABLE_3
+//`define RDNO_PWM_ENABLE_4
+//`define RDNO_PWM_ENABLE_5
+
+
+
+
 `endif // USER_PARMS
 
