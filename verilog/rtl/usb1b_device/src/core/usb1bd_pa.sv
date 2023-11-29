@@ -112,24 +112,24 @@ reg		zero_length_r;
 assign	zero_length = tx_fifo_empty;
 
 always @(posedge clk or negedge rst_n)
-	if(!rst_n)	zero_length_r <= #1 1'b0;
+	if(!rst_n)	zero_length_r <= 1'b0;
 	else
-	if(last)	zero_length_r <= #1 1'b0;
+	if(last)	zero_length_r <= 1'b0;
 	else
-	if(crc16_clr)	zero_length_r <= #1 zero_length;
+	if(crc16_clr)	zero_length_r <= zero_length;
 
 always @(posedge clk)
-	tx_valid_r1 <= #1 tx_valid;
+	tx_valid_r1 <= tx_valid;
 
 always @(posedge clk)
-	tx_valid_r <= #1 tx_valid_r1;
+	tx_valid_r <= tx_valid_r1;
 
 always @(posedge clk or negedge rst_n)
-	if(!rst_n)	send_token_r <= #1 1'b0;
+	if(!rst_n)	send_token_r <= 1'b0;
 	else
-	if(cfg_tx_send_token)	send_token_r <= #1 1'b1;
+	if(cfg_tx_send_token)	send_token_r <= 1'b1;
 	else
-	if(tx_ready)	send_token_r <= #1 1'b0;
+	if(tx_ready)	send_token_r <= 1'b0;
 
 // PID Select
 always @(cfg_tx_token_pid_sel)
@@ -171,27 +171,27 @@ assign tx_valid_last = cfg_tx_send_token | last;
 assign tx_valid = tx_valid_d;
 
 always @(posedge clk)
-	tx_first_r <= #1 cfg_tx_send_token | cfg_tx_send_data;
+	tx_first_r <= cfg_tx_send_token | cfg_tx_send_data;
 
 assign tx_first = (cfg_tx_send_token | cfg_tx_send_data) & ! tx_first_r;
 
 // CRC Logic
 always @(posedge clk)
-	send_data_r <= #1 cfg_tx_send_data;
+	send_data_r <= cfg_tx_send_data;
 
 always @(posedge clk)
-	send_data_r2 <= #1 send_data_r;
+	send_data_r2 <= send_data_r;
 
 assign crc16_clr = cfg_tx_send_data & !send_data_r;
 
 always @(posedge clk)
-	crc16_add <= #1 !zero_length_r &
+	crc16_add <= !zero_length_r &
 			((send_data_r & !send_data_r2) | (tx_fifo_re & !crc_sel1));
 
 always @(posedge clk)
-	if(crc16_clr)		crc16 <= #1 16'hffff;
+	if(crc16_clr)		crc16 <= 16'hffff;
 	else
-	if(crc16_add)		crc16 <= #1 crc16_next;
+	if(crc16_add)		crc16 <= crc16_next;
 
 usb1bd_crc16 u1(
 	.crc_in (	crc16		),
@@ -224,8 +224,8 @@ assign crc16_rev[0]  = ~crc16[7];
 //
 
 always @(posedge clk or negedge rst_n)
-	if(!rst_n)	state <= #1 IDLE;
-	else		state <= #1 next_state;
+	if(!rst_n)	state <= IDLE;
+	else		state <= next_state;
 
 always @(state or cfg_tx_send_data or tx_ready or tx_valid_r or zero_length)
    begin

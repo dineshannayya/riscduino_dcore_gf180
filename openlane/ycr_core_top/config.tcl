@@ -84,7 +84,7 @@ set ::env(FP_PIN_ORDER_CFG) $::env(DESIGN_DIR)/pin_order.cfg
 set ::env(FP_SIZING) absolute
 set ::env(DIE_AREA) "0 0 1500 1500 "
 
-set ::env(PL_TARGET_DENSITY) 0.50
+set ::env(PL_TARGET_DENSITY) 0.45
 #set ::env(CELL_PAD) "4"
 
 ## Routing

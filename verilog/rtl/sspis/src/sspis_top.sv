@@ -71,10 +71,23 @@ logic [31:0]  reg_wdata       ; // write data
 logic [31:0]  reg_rdata       ; // read data
 logic         reg_ack         ; // read valid
 
+
+//###################################
+// Application Reset Synchronization
+//###################################
+wire reset_ssn;
+reset_sync  u_app_rst (
+	      .scan_mode  (1'b0           ),
+          .dclk       (sys_clk        ), // Destination clock domain
+	      .arst_n     (rst_n          ), // active low async reset
+          .srst_n     (rst_ssn        )
+          );
+
+
 sspis_if u_if (
 
-	     .sys_clk         (sys_clk         ),
-	     .rst_n           (rst_n           ),
+	         .sys_clk         (sys_clk         ),
+	         .rst_n           (rst_ssn         ),
 
              .sclk            (sclk            ),
              .ssn             (ssn             ),

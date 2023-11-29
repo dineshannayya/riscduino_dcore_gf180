@@ -148,33 +148,33 @@ assign pid_bad = pid_ACK | pid_NACK | pid_STALL | pid_NYET | pid_PRE |
 assign frame_no_we = rx_token_valid & !crc5_err & pid_SOF;
 
 always @(posedge clk)
-	frame_no_we_r <= #1 frame_no_we;
+	frame_no_we_r <= frame_no_we;
 
 always @(posedge clk or negedge rst)
-	if(!rst)		frame_no_r <= #1 11'h0;
+	if(!rst)		frame_no_r <= 11'h0;
 	else
-	if(frame_no_we_r)	frame_no_r <= #1 frame_no;
+	if(frame_no_we_r)	frame_no_r <= frame_no;
 
 //SOF delay counter
 always @(posedge clk)
-	clr_sof_time <= #1 frame_no_we;
+	clr_sof_time <= frame_no_we;
 
 always @(posedge clk)
-	if(clr_sof_time)	sof_time <= #1 12'h0;
+	if(clr_sof_time)	sof_time <= 12'h0;
 	else
-	if(hms_clk)		sof_time <= #1 sof_time + 12'h1;
+	if(hms_clk)		sof_time <= sof_time + 12'h1;
 
 assign frm_nat = {4'h0, 1'b0, frame_no_r, 4'h0, sof_time};
 
 // 0.5 Micro Seconds Clock Generator
 always @(posedge clk or negedge rst)
-	if(!rst)				hms_cnt <= #1 5'h0;
+	if(!rst)				hms_cnt <= 5'h0;
 	else
-	if(hms_clk | frame_no_we_r)		hms_cnt <= #1 5'h0;
-	else					        hms_cnt <= #1 hms_cnt + 5'h1;
+	if(hms_clk | frame_no_we_r)		hms_cnt <= 5'h0;
+	else					        hms_cnt <= hms_cnt + 5'h1;
 
 always @(posedge clk)
-	hms_clk <= #1 (hms_cnt == cfg_max_hms);
+	hms_clk <= (hms_cnt == cfg_max_hms);
 
 
 ///////////////////////////////////////////////////////////////////

@@ -128,7 +128,7 @@ reg		        rst_local;		// internal reset
 //
 
 always @(posedge clk_i)
-	rst_local <= #1 rst_i & ~usb_rst & srst_n;
+	rst_local <= rst_i & ~usb_rst & srst_n;
 
 
 //------------------------

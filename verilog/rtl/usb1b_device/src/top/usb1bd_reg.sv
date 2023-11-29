@@ -141,17 +141,17 @@ wire [31:0]    reg_1;  // Software-Reg_1
 wire [31:0]    reg_2;  // Software-Reg_2
 wire [31:0]    reg_3;  // Software-Reg_3
 wire [31:0]    reg_4;  // Software-Reg_4
-wire [31:0]    reg_5;  // Software-Reg_5
+//wire [31:0]    reg_5;  // Software-Reg_5
 wire [31:0]    reg_6;  // Software-Reg_6
-wire [31:0]    reg_7;  // Software-Reg_7
-wire [31:0]    reg_8;  // Software-Reg_8
-wire [31:0]    reg_9;  // Software-Reg_9
-wire [31:0]    reg_10; // Software-Reg_10
-wire [31:0]    reg_11; // Software-Reg_11
-wire [31:0]    reg_12; // Software-Reg_12
-wire [31:0]    reg_13; // Software-Reg_13
-wire [31:0]    reg_14; // Software-Reg_14
-wire [31:0]    reg_15; // Software-Reg_15
+//wire [31:0]    reg_7;  // Software-Reg_7
+//wire [31:0]    reg_8;  // Software-Reg_8
+//wire [31:0]    reg_9;  // Software-Reg_9
+//wire [31:0]    reg_10; // Software-Reg_10
+//wire [31:0]    reg_11; // Software-Reg_11
+//wire [31:0]    reg_12; // Software-Reg_12
+//wire [31:0]    reg_13; // Software-Reg_13
+//wire [31:0]    reg_14; // Software-Reg_14
+//wire [31:0]    reg_15; // Software-Reg_15
 reg  [31:0]    reg_out;
 
 //-----------------------------------------------------------------------
@@ -241,10 +241,10 @@ begin : preg_sel_Com
     4'b0010 : reg_out [31:0] = reg_2 [31:0];     
     4'b0011 : reg_out [31:0] = reg_3 [31:0];    
     4'b0100 : reg_out [31:0] = reg_4 [31:0];    
-    4'b0101 : reg_out [31:0] = reg_5 [31:0];
+    4'b0101 : reg_out [31:0] = 'h0;
     4'b0110 : reg_out [31:0] = reg_6 [31:0];    
-    4'b0111 : reg_out [31:0] = reg_7 [31:0];    
-    4'b1000 : reg_out [31:0] = reg_8 [31:0];    
+    4'b0111 : reg_out [31:0] = 'h0;    
+    4'b1000 : reg_out [31:0] = 'h0;    
     4'b1001 : reg_out [31:0] = 'h0;
     4'b1010 : reg_out [31:0] = 'h0;
     4'b1011 : reg_out [31:0] = 'h0;
@@ -331,7 +331,7 @@ generic_register #(4,4'h0  ) u_reg1_set3 (
 assign reg_1[19:16] = 'b0;
 
 
-generic_register #(8,8'h0  ) u_reg1_be4 (
+generic_register #(4,4'h0  ) u_reg1_be4 (
            .we            ({4{sw_wr_en_1 & 
                               sw_wr_be[3]   }}  ),		 
 
@@ -425,6 +425,7 @@ assign tx_fifo_data   = sw_wr_data[7:0];
 
 // reg_6 is rx_fifo read
 // rx_fifo read data
+assign reg_6[31:8] = 'h0;
 assign reg_6[7:0] = {rx_fifo_data};
 assign  rx_fifo_rd_en = sw_rd_en_6 & reg_ack & !rx_fifo_empty;
 

@@ -94,19 +94,19 @@ reg		TxValid;
 //
 
 always @(posedge phy_clk or negedge rst)
-	if(!rst)	rx_valid <= #1 1'b0;
-	else		rx_valid <= #1 RxValid;
+	if(!rst)	rx_valid <= 1'b0;
+	else		rx_valid <= RxValid;
 
 always @(posedge phy_clk or negedge rst)
-	if(!rst)	rx_active <= #1 1'b0;
-	else		rx_active <= #1 RxActive;
+	if(!rst)	rx_active <= 1'b0;
+	else		rx_active <= RxActive;
 
 always @(posedge phy_clk or negedge rst)
-	if(!rst)	rx_err <= #1 1'b0;
-	else		rx_err <= #1 RxError;
+	if(!rst)	rx_err <= 1'b0;
+	else		rx_err <= RxError;
 
 always @(posedge phy_clk)
-		rx_data <= #1 RxDataIn;
+		rx_data <= RxDataIn;
 
 ///////////////////////////////////////////////////////////////////
 //
@@ -114,15 +114,15 @@ always @(posedge phy_clk)
 //
 
 always @(posedge phy_clk)
-	if(TxReady | tx_first)	TxDataOut <= #1 tx_data;
+	if(TxReady | tx_first)	TxDataOut <= tx_data;
 
 always @(posedge phy_clk)
-	tx_ready <= #1 TxReady;
+	tx_ready <= TxReady;
 
 always @(posedge phy_clk or negedge rst)
-	if(!rst)	TxValid <= #1 1'b0;
+	if(!rst)	TxValid <= 1'b0;
 	else
-	TxValid <= #1 tx_valid | tx_valid_last | (TxValid & !TxReady);
+	TxValid <= tx_valid | tx_valid_last | (TxValid & !TxReady);
 
 endmodule
 

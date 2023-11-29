@@ -141,22 +141,22 @@ wire	[15:0]	crc16_out;
 reg	rx_busy_d;
 
 always @(posedge clk or negedge rst_n)
-	if(!rst_n)			rx_busy_d <= #1 1'b0;
+	if(!rst_n)			rx_busy_d <= 1'b0;
 	else
-	if(rx_valid & (state == DATA))	rx_busy_d <= #1 1'b1;
+	if(rx_valid & (state == DATA))	rx_busy_d <= 1'b1;
 	else
-	if(state != DATA)		rx_busy_d <= #1 1'b0;
+	if(state != DATA)		rx_busy_d <= 1'b0;
 
 always @(posedge clk)
-	rx_busy <= #1 rx_busy_d;
+	rx_busy <= rx_busy_d;
 
 // PID Decoding Logic
 assign pid_ld_en = pid_le_sm & rx_active & rx_valid;
 
 always @(posedge clk or negedge rst_n)
-	if(!rst_n)		pid <= #1 8'hf0;
+	if(!rst_n)		pid <= 8'hf0;
 	else
-	if(pid_ld_en)		pid <= #1 rx_data;
+	if(pid_ld_en)		pid <= rx_data;
 
 assign	pid_cks_err = (pid[3:0] != ~pid[7:4]);
 
@@ -186,19 +186,19 @@ assign	pid_DATA = pid_DATA0 | pid_DATA1 | pid_DATA2 | pid_MDATA;
 
 // Token Decoding LOGIC
 always @(posedge clk)
-	if(token_le_1)	token0 <= #1 rx_data;
+	if(token_le_1)	token0 <= rx_data;
 
 always @(posedge clk)
-	if(token_le_2)	token1 <= #1 rx_data;
+	if(token_le_2)	token1 <= rx_data;
 
 always @(posedge clk)
-	token_valid_r1 <= #1 token_le_2;
+	token_valid_r1 <= token_le_2;
 
 always @(posedge clk)
-	token_valid_str1 <= #1 token_valid_r1 | pid_ack;
+	token_valid_str1 <= token_valid_r1 | pid_ack;
 
 always @(posedge clk)
-	token_valid_str2 <= #1 token_valid_str1;
+	token_valid_str2 <= token_valid_str1;
 
 assign token_valid = token_valid_str1;
 
@@ -233,23 +233,23 @@ assign token_crc5 = token1[7:3];
 // Data receiving logic
 // build a delay line and stop when we are about to get crc
 always @(posedge clk or negedge rst_n)
-	if(!rst_n)		rxv1 <= #1 1'b0;
-	else if(data_valid_d)	rxv1 <= #1 1'b1;
-	else if(data_done)		rxv1 <= #1 1'b0;
+	if(!rst_n)		rxv1 <= 1'b0;
+	else if(data_valid_d)	rxv1 <= 1'b1;
+	else if(data_done)		rxv1 <= 1'b0;
 
 always @(posedge clk or negedge rst_n)
-	if(!rst_n)		rxv2 <= #1 1'b0;
-	else if(rxv1 & data_valid_d)	rxv2 <= #1 1'b1;
-	else if(data_done)		rxv2 <= #1 1'b0;
+	if(!rst_n)		rxv2 <= 1'b0;
+	else if(rxv1 & data_valid_d)	rxv2 <= 1'b1;
+	else if(data_done)		rxv2 <= 1'b0;
 
 always @(posedge clk)
-	data_valid0 <= #1 rxv2 & data_valid_d;
+	data_valid0 <= rxv2 & data_valid_d;
 
 always @(posedge clk)
    begin
-	if(data_valid_d)	d0 <= #1 rx_data;
-	if(data_valid_d)	d1 <= #1 d0;
-	if(data_valid_d)	d2 <= #1 d1;
+	if(data_valid_d)	d0 <= rx_data;
+	if(data_valid_d)	d1 <=  d0;
+	if(data_valid_d)	d2 <=  d1;
    end
 
 assign rx_data_st = d2;
@@ -260,13 +260,13 @@ assign rx_data_done = data_done;
 // when data_done is asserted, crc16 reports status, and resets itself
 // next cycle.
 always @(posedge clk)
-	rx_active_r <= #1 rx_active;
+	rx_active_r <=  rx_active;
 
 assign crc16_clr = rx_active & !rx_active_r;
 
 always @(posedge clk)
-	if(crc16_clr)		crc16_sum <= #1 16'hffff;
-	else if(data_valid_d)	crc16_sum <= #1 crc16_out;
+	if(crc16_clr)		crc16_sum <= 16'hffff;
+	else if(data_valid_d)	crc16_sum <= crc16_out;
 
 usb1bd_crc16 u1(
 	.crc_in(	crc16_sum		),
@@ -283,8 +283,8 @@ assign crc16_err = data_done & (crc16_sum != 16'h800d);
 //
 
 always @(posedge clk or negedge rst_n)
-	if(!rst_n)	state <= #1 IDLE;
-	else		state <= #1 next_state;
+	if(!rst_n)	state <= IDLE;
+	else		state <= next_state;
 
 always @(state or rx_valid or rx_active or rx_err or pid_ACK or pid_TOKEN
 	or pid_DATA)
