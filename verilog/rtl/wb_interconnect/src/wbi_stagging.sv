@@ -70,24 +70,24 @@ module wbi_stagging
        input   logic               reset_n         ,  // Regular Reset signal
        input   logic               mclk            ,  // System clock
 
-    // Master Command Port
-       output  logic               wbm_cmd_wrdy_o  ,  // Ready path Ready to accept the data
-       input   logic               wbm_cmd_wval_i  ,
-       input   logic [AW-1:0]      wbm_cmd_adr_i   ,  // address
-       input   logic               wbm_cmd_we_i    ,  // write
-       input   logic [DW-1:0]      wbm_cmd_dat_i   ,  // data output
-       input   logic [BW-1:0]      wbm_cmd_sel_i   ,  // byte enable
-       input   logic [3:0]         wbm_cmd_tid_i   ,
-       input   logic [BL-1:0]      wbm_cmd_bl_i    ,  // Burst Count
+    // Previous Chain- Command Port
+       output  logic               wbp_cmd_wrdy_o  ,  // Ready path Ready to accept the data
+       input   logic               wbp_cmd_wval_i  ,
+       input   logic [AW-1:0]      wbp_cmd_adr_i   ,  // address
+       input   logic               wbp_cmd_we_i    ,  // write
+       input   logic [DW-1:0]      wbp_cmd_dat_i   ,  // data output
+       input   logic [BW-1:0]      wbp_cmd_sel_i   ,  // byte enable
+       input   logic [3:0]         wbp_cmd_tid_i   ,
+       input   logic [BL-1:0]      wbp_cmd_bl_i    ,  // Burst Count
 
-    // Master Response Port
-       input   logic               wbm_res_rrdy_i  ,  // Ready path Ready to accept the data
-       output  logic               wbm_res_rval_o  ,
-       output  logic [DW-1:0]      wbm_res_dat_o   ,  // data input
-       output  logic               wbm_res_ack_o   ,  // acknowlegement
-       output  logic               wbm_res_lack_o  ,  // Last Burst access
-       output  logic               wbm_res_err_o   ,  // error
-       output  logic [3:0]         wbm_res_tid_o   ,
+    // Previous Chain- Response Port
+       input   logic               wbp_res_rrdy_i  ,  // Ready path Ready to accept the data
+       output  logic               wbp_res_rval_o  ,
+       output  logic [DW-1:0]      wbp_res_dat_o   ,  // data input
+       output  logic               wbp_res_ack_o   ,  // acknowlegement
+       output  logic               wbp_res_lack_o  ,  // Last Burst access
+       output  logic               wbp_res_err_o   ,  // error
+       output  logic [3:0]         wbp_res_tid_o   ,
 
    // Next Daisy Chain Command
        input    logic              wbd_cmd_wrdy_i  ,  // Ready path Ready to accept the data
@@ -117,7 +117,7 @@ module wbi_stagging
 //----------------------------------------
 logic wbd_cmd_hold;
 
-assign wbm_cmd_wrdy_o = (wbd_cmd_hold == 0) || (wbd_cmd_wrdy_i && wbd_cmd_wval_o);
+assign wbp_cmd_wrdy_o = (wbd_cmd_hold == 0) || (wbd_cmd_wrdy_i && wbd_cmd_wval_o);
 assign wbd_cmd_wval_o = (wbd_cmd_hold == 1);
 
 always @ (posedge mclk or negedge reset_n)
@@ -130,13 +130,13 @@ begin
       wbd_cmd_tid_o    <= 'h0;
       wbd_cmd_bl_o     <= 'h0;
       wbd_cmd_hold     <= 1'b0;
-   end else if (wbm_cmd_wval_i && wbm_cmd_wrdy_o) begin
-      wbd_cmd_adr_o    <= wbm_cmd_adr_i; 
-      wbd_cmd_we_o     <= wbm_cmd_we_i;  
-      wbd_cmd_dat_o    <= wbm_cmd_dat_i; 
-      wbd_cmd_sel_o    <= wbm_cmd_sel_i; 
-      wbd_cmd_tid_o    <= wbm_cmd_tid_i; 
-      wbd_cmd_bl_o     <= wbm_cmd_bl_i;  
+   end else if (wbp_cmd_wval_i && wbp_cmd_wrdy_o) begin
+      wbd_cmd_adr_o    <= wbp_cmd_adr_i; 
+      wbd_cmd_we_o     <= wbp_cmd_we_i;  
+      wbd_cmd_dat_o    <= wbp_cmd_dat_i; 
+      wbd_cmd_sel_o    <= wbp_cmd_sel_i; 
+      wbd_cmd_tid_o    <= wbp_cmd_tid_i; 
+      wbd_cmd_bl_o     <= wbp_cmd_bl_i;  
       wbd_cmd_hold     <= 1'b1;    
    end else if (wbd_cmd_wrdy_i && wbd_cmd_wval_o) begin
       wbd_cmd_hold     <= 1'b0;    
@@ -147,29 +147,29 @@ end
 //----------------------------------------
 // response Stagging
 //----------------------------------------
-logic wbm_res_hold;
+logic wbp_res_hold;
 
-assign wbd_res_rrdy_o = (wbm_res_hold == 0) || (wbm_res_rrdy_i && wbm_res_rval_o);
-assign wbm_res_rval_o = (wbm_res_hold == 1);
+assign wbd_res_rrdy_o = (wbp_res_hold == 0) || (wbp_res_rrdy_i && wbp_res_rval_o);
+assign wbp_res_rval_o = (wbp_res_hold == 1);
 
 always @ (posedge mclk or negedge reset_n)
 begin 
    if (reset_n == 1'b0) begin
-      wbm_res_dat_o     <= 'h0;
-      wbm_res_ack_o     <= 1'b0;
-      wbm_res_lack_o    <= 1'b0;
-      wbm_res_err_o     <= 1'b0;
-      wbm_res_tid_o     <= 'h0;
-      wbm_res_hold      <= 1'b0;
+      wbp_res_dat_o     <= 'h0;
+      wbp_res_ack_o     <= 1'b0;
+      wbp_res_lack_o    <= 1'b0;
+      wbp_res_err_o     <= 1'b0;
+      wbp_res_tid_o     <= 'h0;
+      wbp_res_hold      <= 1'b0;
    end else if (wbd_res_rval_i && wbd_res_rrdy_o) begin
-      wbm_res_dat_o    <= wbd_res_dat_i;    
-      wbm_res_ack_o    <= wbd_res_ack_i;    
-      wbm_res_lack_o   <= wbd_res_lack_i;   
-      wbm_res_err_o    <= wbd_res_err_i;    
-      wbm_res_tid_o    <= wbd_res_tid_i;    
-      wbm_res_hold     <= 1'b1;    
+      wbp_res_dat_o    <= wbd_res_dat_i;    
+      wbp_res_ack_o    <= wbd_res_ack_i;    
+      wbp_res_lack_o   <= wbd_res_lack_i;   
+      wbp_res_err_o    <= wbd_res_err_i;    
+      wbp_res_tid_o    <= wbd_res_tid_i;    
+      wbp_res_hold     <= 1'b1;    
    end else if (wbd_cmd_wrdy_i && wbd_cmd_wval_o) begin
-      wbm_res_hold     <= 1'b0;    
+      wbp_res_hold     <= 1'b0;    
    end                             
 end                                
                                    

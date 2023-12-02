@@ -144,18 +144,10 @@ module wb_host (
     input   logic               wbs_err_i        ,  // error
 
     output logic [31:0]         cfg_clk_skew_ctrl1    ,
-    output logic [31:0]         cfg_clk_skew_ctrl2    ,
+    output logic [31:0]         cfg_clk_skew_ctrl2    
 
-    input  logic [19:0]         la_data_in       ,
 
-    input  logic                uartm_rxd        ,
-    output logic                uartm_txd        ,
 
-    input  logic                sclk             ,
-    input  logic                ssn              ,
-    input  logic                sdin             ,
-    output logic                sdout            ,
-    output logic                sdout_oen        
 
 
     );
@@ -175,28 +167,6 @@ logic               reg_ack    ;
 logic [15:0]        cfg_bank_sel;
 
 
-
-// uart Master Port
-logic               wbm_uart_cyc_i        ;  // strobe/request
-logic               wbm_uart_stb_i        ;  // strobe/request
-logic [31:0]        wbm_uart_adr_i        ;  // address
-logic               wbm_uart_we_i         ;  // write
-logic [31:0]        wbm_uart_dat_i        ;  // data output
-logic [3:0]         wbm_uart_sel_i        ;  // byte enable
-logic [31:0]        wbm_uart_dat_o        ;  // data input
-logic               wbm_uart_ack_o        ;  // acknowlegement
-logic               wbm_uart_err_o        ;  // error
-
-// SPI SLAVE Port
-logic               wbm_spi_cyc_i        ;  // strobe/request
-logic               wbm_spi_stb_i        ;  // strobe/request
-logic [31:0]        wbm_spi_adr_i        ;  // address
-logic               wbm_spi_we_i         ;  // write
-logic [31:0]        wbm_spi_dat_i        ;  // data output
-logic [3:0]         wbm_spi_sel_i        ;  // byte enable
-logic [31:0]        wbm_spi_dat_o        ;  // data input
-logic               wbm_spi_ack_o        ;  // acknowlegement
-logic               wbm_spi_err_o        ;  // error
 
 // Selected Master Port
 logic               wb_cyc_i              ;  // strobe/request
@@ -269,127 +239,31 @@ wbh_reset_fsm u_reset_fsm (
 );
 
 
-//-------------------------------------------------
-// UART2WB HOST
-//    Uart Baud-16x computation
-//      Assumption is default wb clock is 50Mhz 
-//      For 9600 Baud
-//        50,000,000/(9600*16) = 324;
-//      Configured Value = 325-2 = 324
-//      Internally we have used pos and neg counter
-//      it has additional 1 cycle additional count,
-//      so we are subtracting desired count by 2
-// strap_uartm
-//     1'b0 - Auto Baud Detect
-//     1'b1 - Load from LA
-//-------------------------------------------------
-
-assign     strap_uartm           = system_strap[`STRAP_UARTM_CFG];
-
-wire       cfg_uartm_tx_enable   = (strap_uartm==1'b1) ? la_data_in[1]     : 1'b1;
-wire       cfg_uartm_rx_enable   = (strap_uartm==1'b1) ? la_data_in[2]     : 1'b1;
-wire       cfg_uartm_tx_stop_bit = (strap_uartm==1'b1) ? la_data_in[3]     : 1'b1;
-wire       cfg_uartm_rx_stop_bit = (strap_uartm==1'b1) ? la_data_in[4]     : 1'b0;
-wire [1:0] cfg_uartm_cfg_pri_mod = (strap_uartm==1'b1) ? la_data_in[6:5]   : 2'b0;
-wire [11:0]cfg_uart_baud_16x     = (strap_uartm==1'b0) ? 'h0: la_data_in[19:8];
-wire       cfg_uartm_aut_det     = (strap_uartm==1'b0) ? 1'b1: 1'b0;
-
-
-
-// UART Master
-uart2wb u_uart2wb (  
-        .arst_n          (s_reset_n               ), //  sync reset
-        .app_clk         (wbm_clk_i               ), //  sys clock    
-
-	// configuration control
-       .cfg_auto_det     (cfg_uartm_aut_det       ), // Auto Baud Value detect
-       .cfg_tx_enable    (cfg_uartm_tx_enable     ), // Enable Transmit Path
-       .cfg_rx_enable    (cfg_uartm_rx_enable     ), // Enable Received Path
-       .cfg_tx_stop_bit  (cfg_uartm_tx_stop_bit   ), // 0 -> 1 Start , 1 -> 2 Stop Bits
-       .cfg_rx_stop_bit  (cfg_uartm_rx_stop_bit   ), // 0 -> 1 Start , 1 -> 2 Stop Bits
-       .cfg_baud_16x     (cfg_uart_baud_16x       ), // 16x Baud clock generation
-       .cfg_pri_mod      (cfg_uartm_cfg_pri_mod   ), // priority mode, 0 -> nop, 1 -> Even, 2 -> Odd
-
-    // Master Port
-       .wbm_cyc_o        (wbm_uart_cyc_i ),  // strobe/request
-       .wbm_stb_o        (wbm_uart_stb_i ),  // strobe/request
-       .wbm_adr_o        (wbm_uart_adr_i ),  // address
-       .wbm_we_o         (wbm_uart_we_i  ),  // write
-       .wbm_dat_o        (wbm_uart_dat_i ),  // data output
-       .wbm_sel_o        (wbm_uart_sel_i ),  // byte enable
-       .wbm_dat_i        (wbm_uart_dat_o ),  // data input
-       .wbm_ack_i        (wbm_uart_ack_o ),  // acknowlegement
-       .wbm_err_i        (wbm_uart_err_o ),  // error
-
-       // Status information
-       .frm_error        (), // framing error
-       .par_error        (), // par error
-
-       .baud_clk_16x     (), // 16x Baud clock
-
-       // Line Interface
-       .rxd              (uartm_rxd) , // uart rxd
-       .txd              (uartm_txd)   // uart txd
-
-     );
-
-//----------------------------------------
-// SPI as ISP
-//----------------------------------------
-
-sspis_top u_spi2wb(
-
-	     .sys_clk         (wbm_clk_i       ),
-	     .rst_n           (e_reset_n       ),
-
-         .sclk            (sclk            ),
-         .ssn             (ssn             ),
-         .sdin            (sdin            ),
-         .sdout           (sdout           ),
-         .sdout_oen       (sdout_oen       ),
-
-          // WB Master Port
-         .wbm_cyc_o       (wbm_spi_cyc_i   ),  // strobe/request
-         .wbm_stb_o       (wbm_spi_stb_i   ),  // strobe/request
-         .wbm_adr_o       (wbm_spi_adr_i   ),  // address
-         .wbm_we_o        (wbm_spi_we_i    ),  // write
-         .wbm_dat_o       (wbm_spi_dat_i   ),  // data output
-         .wbm_sel_o       (wbm_spi_sel_i   ),  // byte enable
-         .wbm_dat_i       (wbm_spi_dat_o   ),  // data input
-         .wbm_ack_i       (wbm_spi_ack_o   ),  // acknowlegement
-         .wbm_err_i       (wbm_spi_err_o   )   // error
-    );
 
 //--------------------------------------------------
-// Arbitor to select between external wb vs uart wb vs spi
+// Arbitor to select between external wb vs uart wb 
 //---------------------------------------------------
 wire [1:0] grnt;
 wb_arb u_arb(
 	.clk      (wbm_clk_i), 
 	.rstn     (s_reset_n), 
-	.req      ({1'b0,wbm_spi_stb_i,wbm_uart_stb_i,(wbm_stb_i & wbm_cyc_i)}), 
+	.req      ({1'b0,1'b0,1'b0,(wbm_stb_i & wbm_cyc_i)}), 
 	.gnt      (grnt)
         );
 
 // Select  the master based on the grant
-assign wb_cyc_i = (grnt == 2'b00) ? wbm_cyc_i               :(grnt == 2'b01) ? wbm_uart_cyc_i :wbm_spi_cyc_i; 
-assign wb_stb_i = (grnt == 2'b00) ? (wbm_cyc_i & wbm_stb_i) :(grnt == 2'b01) ? wbm_uart_stb_i :wbm_spi_stb_i; 
-assign wb_adr_i = (grnt == 2'b00) ? wbm_adr_i               :(grnt == 2'b01) ? wbm_uart_adr_i :wbm_spi_adr_i; 
-assign wb_we_i  = (grnt == 2'b00) ? wbm_we_i                :(grnt == 2'b01) ? wbm_uart_we_i  :wbm_spi_we_i ; 
-assign wb_dat_i = (grnt == 2'b00) ? wbm_dat_i               :(grnt == 2'b01) ? wbm_uart_dat_i :wbm_spi_dat_i; 
-assign wb_sel_i = (grnt == 2'b00) ? wbm_sel_i               :(grnt == 2'b01) ? wbm_uart_sel_i :wbm_spi_sel_i; 
+assign wb_cyc_i = (grnt == 2'b00) ? wbm_cyc_i               :'h0; 
+assign wb_stb_i = (grnt == 2'b00) ?(wbm_cyc_i & wbm_stb_i)  :'h0; 
+assign wb_adr_i = (grnt == 2'b00) ? wbm_adr_i               :'h0; 
+assign wb_we_i  = (grnt == 2'b00) ? wbm_we_i                :'h0; 
+assign wb_dat_i = (grnt == 2'b00) ? wbm_dat_i               :'h0; 
+assign wb_sel_i = (grnt == 2'b00) ? wbm_sel_i               :'h0; 
 
 assign wbm_dat_o = (grnt == 2'b00) ? wb_dat_o : 'h0;
 assign wbm_ack_o = (grnt == 2'b00) ? wb_ack_o : 'h0;
 assign wbm_err_o = (grnt == 2'b00) ? wb_err_o : 'h0;
 
-assign wbm_uart_dat_o = (grnt == 2'b01) ? wb_dat_o : 'h0;
-assign wbm_uart_ack_o = (grnt == 2'b01) ? wb_ack_o : 'h0;
-assign wbm_uart_err_o = (grnt == 2'b01) ? wb_err_o : 'h0;
 
-assign wbm_spi_dat_o = (grnt == 2'b10) ? wb_dat_o : 'h0;
-assign wbm_spi_ack_o = (grnt == 2'b10) ? wb_ack_o : 'h0;
-assign wbm_spi_err_o = (grnt == 2'b10) ? wb_err_o : 'h0;
 
 
 

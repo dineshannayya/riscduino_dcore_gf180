@@ -46,9 +46,9 @@ module peri_wrapper1 (
                        input logic             vssd1,// User area 1 digital ground
                     `endif
                         // clock skew adjust
-                       input logic [3:0]       cfg_cska_per1,
+                       input logic [3:0]       cfg_cska_peri,
                        input logic	           wbd_clk_int,
-                       output logic	           wbd_clk_per1,
+                       output logic	           wbd_clk_skew,
                        // System Signals
                        // Inputs
 		               input logic             mclk,
@@ -102,8 +102,8 @@ clk_skew_adjust u_skew_pinmux
                .vssd1      (vssd1                 ),// User area 1 digital ground
 `endif
 	       .clk_in     (wbd_clk_int               ), 
-	       .sel        (cfg_cska_per1             ), 
-	       .clk_out    (wbd_clk_per1              ) 
+	       .sel        (cfg_cska_peri             ), 
+	       .clk_out    (wbd_clk_skew              ) 
        );
 
 reset_sync  u_rst_sync (

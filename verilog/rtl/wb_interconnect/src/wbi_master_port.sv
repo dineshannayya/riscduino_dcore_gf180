@@ -263,23 +263,23 @@ wbi_stagging  u_stagging (
        .mclk                   (mclk               ),  // System clock
 
     // Master Command Port
-       .wbm_cmd_wrdy_o        (stg_cmd_wrdy_o      ),  // Ready path Ready to accept the data
-       .wbm_cmd_wval_i        (stg_cmd_wval_i      ),
-       .wbm_cmd_adr_i         (stg_cmd_adr_i       ),  // address
-       .wbm_cmd_we_i          (stg_cmd_we_i        ),  // write
-       .wbm_cmd_dat_i         (stg_cmd_dat_i       ),  // data output
-       .wbm_cmd_sel_i         (stg_cmd_sel_i       ),  // byte enable
-       .wbm_cmd_tid_i         (stg_cmd_tid_i       ),
-       .wbm_cmd_bl_i          (stg_cmd_bl_i        ),  // Burst Count
+       .wbp_cmd_wrdy_o        (stg_cmd_wrdy_o      ),  // Ready path Ready to accept the data
+       .wbp_cmd_wval_i        (stg_cmd_wval_i      ),
+       .wbp_cmd_adr_i         (stg_cmd_adr_i       ),  // address
+       .wbp_cmd_we_i          (stg_cmd_we_i        ),  // write
+       .wbp_cmd_dat_i         (stg_cmd_dat_i       ),  // data output
+       .wbp_cmd_sel_i         (stg_cmd_sel_i       ),  // byte enable
+       .wbp_cmd_tid_i         (stg_cmd_tid_i       ),
+       .wbp_cmd_bl_i          (stg_cmd_bl_i        ),  // Burst Count
 
     // Master Response Port
-       .wbm_res_rrdy_i        (stg_res_rrdy_i      ),  // Ready path Ready to accept the data
-       .wbm_res_rval_o        (stg_res_rval_o      ),
-       .wbm_res_dat_o         (stg_res_dat_o       ),  // data input
-       .wbm_res_ack_o         (stg_res_ack_o       ),  // acknowlegement
-       .wbm_res_lack_o        (stg_res_lack_o      ),  // Last Burst access
-       .wbm_res_err_o         (stg_res_err_o       ),  // error
-       .wbm_res_tid_o         (stg_res_tid_o       ),
+       .wbp_res_rrdy_i        (stg_res_rrdy_i      ),  // Ready path Ready to accept the data
+       .wbp_res_rval_o        (stg_res_rval_o      ),
+       .wbp_res_dat_o         (stg_res_dat_o       ),  // data input
+       .wbp_res_ack_o         (stg_res_ack_o       ),  // acknowlegement
+       .wbp_res_lack_o        (stg_res_lack_o      ),  // Last Burst access
+       .wbp_res_err_o         (stg_res_err_o       ),  // error
+       .wbp_res_tid_o         (stg_res_tid_o       ),
 
    // Next Daisy Chain Command
        .wbd_cmd_wrdy_i        (wbd_cmd_wrdy_i      ),  // Ready path Ready to accept the data

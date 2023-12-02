@@ -427,10 +427,12 @@ always_comb begin
      sflash_di[3] = digital_io_in[40];
      
 
+   `ifdef YCR_DBG_EN
     riscv_trst_n  = (cfg_tap_enb) ? digital_io_in[0] : 1'b1;
     riscv_tck     = (cfg_tap_enb) ? digital_io_in[1] : 1'b0;
     riscv_tms     = (cfg_tap_enb) ? digital_io_in[2] : 1'b0;
     riscv_tdi     = (cfg_tap_enb) ? digital_io_in[3] : 1'b0;
+    `endif
 
 end
 
@@ -552,7 +554,11 @@ always_comb begin
      digital_io_out[1] = (cfg_sm_enb) ? sm_a2 : port_a_out[1] ;
      digital_io_out[2] = (cfg_sm_enb) ? sm_b1 : port_a_out[2] ;
      digital_io_out[3] = (cfg_sm_enb) ? sm_b2 : port_a_out[3] ;
+    `ifdef YCR_DBG_EN
      digital_io_out[4] = (cfg_tap_enb)? riscv_tdo : port_a_out[4] ;
+     `else
+     digital_io_out[4] =  port_a_out[4] ;
+     `endif
      digital_io_out[5] = port_a_out[5] ;
      digital_io_out[6] = port_a_out[6] ;
      digital_io_out[7] = port_a_out[7] ;
@@ -711,8 +717,12 @@ always_comb begin
      else if(cfg_sm_enb)             digital_io_oen[3]   = 1'b0;
      else if(cfg_port_a_dir_sel[3])  digital_io_oen[3]   = 1'b0;
 
-     if(cfg_tap_enb)                 digital_io_oen[4]   = riscv_tdo_en; // riscv_tdo - output
-     else if(cfg_port_a_dir_sel[4])  digital_io_oen[4]   = 1'b0;
+     `ifdef YCR_DBG_EN
+         if(cfg_tap_enb)                 digital_io_oen[4]   = riscv_tdo_en; // riscv_tdo - output
+         else if(cfg_port_a_dir_sel[4])  digital_io_oen[4]   = 1'b0;
+     `else
+         if(cfg_port_a_dir_sel[4])       digital_io_oen[4]   = 1'b0;
+     `endif
 
      if(cfg_port_a_dir_sel[5])  digital_io_oen[5]   = 1'b0;
      if(cfg_port_a_dir_sel[6])  digital_io_oen[6]   = 1'b0;

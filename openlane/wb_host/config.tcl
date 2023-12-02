@@ -29,8 +29,8 @@ set ::env(DESIGN_IS_CORE) "0"
 
 # Timing configuration
 set ::env(CLOCK_PERIOD) "10"
-set ::env(CLOCK_PORT) "wbm_clk_i wbs_clk_i u_uart2wb.u_core.u_uart_clk.genblk1.u_mux/Z"
-set ::env(CLOCK_NET) "wbm_clk_i wbs_clk_i u_uart2wb.u_core.u_uart_clk.genblk1.u_mux/Z"
+set ::env(CLOCK_PORT) "wbm_clk_i wbs_clk_i "
+set ::env(CLOCK_NET) "wbm_clk_i wbs_clk_i "
 #set ::env(CLOCK_NET) "wbm_clk_i wbs_clk_i u_uart2wb.u_core.u_uart_clk.genblk1.u_mux/X u_uart2wb.u_arst_sync.u_buf.genblk1.u_mux/X"
 
 set ::env(SYNTH_MAX_FANOUT) 4
@@ -61,13 +61,6 @@ set ::env(VERILOG_FILES) "\
      $::env(DESIGN_DIR)/../../verilog/rtl/lib/double_sync_low.v  \
      $::env(DESIGN_DIR)/../../verilog/rtl/lib/clk_div8.v  \
      $::env(DESIGN_DIR)/../../verilog/rtl/wb_interconnect/src/wb_arb.sv     \
-     $::env(DESIGN_DIR)/../../verilog/rtl/uart2wb/src/uart2wb.sv \
-     $::env(DESIGN_DIR)/../../verilog/rtl/uart2wb/src/uart2_core.sv \
-     $::env(DESIGN_DIR)/../../verilog/rtl/uart2wb/src/uart_msg_handler.v \
-     $::env(DESIGN_DIR)/../../verilog/rtl/uart2wb/src/uart_auto_det.sv \
-     $::env(DESIGN_DIR)/../../verilog/rtl/sspis/src/sspis_top.sv \
-     $::env(DESIGN_DIR)/../../verilog/rtl/sspis/src/sspis_if.sv \
-     $::env(DESIGN_DIR)/../../verilog/rtl/sspis/src/spi2wb.sv \
      "
 set ::env(VERILOG_INCLUDE_DIRS) [glob $::env(DESIGN_DIR)/../../verilog/rtl/ ]
 
@@ -88,7 +81,7 @@ set ::env(GND_PIN) [list {vssd1}]
 set ::env(FP_PIN_ORDER_CFG) $::env(DESIGN_DIR)/pin_order.cfg
 
 set ::env(FP_SIZING) absolute
-set ::env(DIE_AREA) "0 0 800 800"
+set ::env(DIE_AREA) "0 0 500 500"
 
 #set ::env(GRT_OBS) "met4  0 0 450 425"
 
@@ -101,7 +94,8 @@ set ::env(RUN_CVC) 0
 set ::env(GRT_ADJUSTMENT) 0.2
 
 set ::env(PL_TIME_DRIVEN) 1
-set ::env(PL_TARGET_DENSITY) "0.42"
+set ::env(PL_TARGET_DENSITY) "0.50"
+set ::env(GPL_CELL_PADDING) "2"
 
 
 

@@ -23,12 +23,10 @@ set ::env(DESIGN_NAME) ycr_core_top
 set ::env(DESIGN_IS_CORE) "0"
 set ::env(FP_PDN_CORE_RING) "0"
 
-set ::env(CLOCK_PERIOD) "10"
+set ::env(CLOCK_PERIOD) "20"
 set ::env(CLOCK_PORT) "clk"
 
 set ::env(SYNTH_MAX_FANOUT) 8
-set ::env(SYNTH_BUFFERING) {0}
-set ::env(SYNTH_NO_FLAT) "1"
 
 ## CTS BUFFER
 set ::env(CTS_CLK_MAX_WIRE_LENGTH) {250}
@@ -65,7 +63,6 @@ set ::env(VERILOG_FILES) "\
 	"
 set ::env(VERILOG_INCLUDE_DIRS) [glob $::env(DESIGN_DIR)/../../verilog/rtl/yifive/includes ]
 set ::env(SYNTH_READ_BLACKBOX_LIB) 1
-set ::env(RUN_LINTER) "0"
 set ::env(SYNTH_DEFINES) [list SYNTHESIS GF180NM ]
 
 
@@ -73,7 +70,6 @@ set ::env(SDC_FILE) $::env(DESIGN_DIR)/base.sdc
 set ::env(BASE_SDC_FILE) $::env(DESIGN_DIR)/base.sdc
 
 #set ::env(SYNTH_ENB_CG) 1
-set ::env(LEC_ENABLE) 0
 set ::env(GRT_ALLOW_CONGESTION) {1}
 
 set ::env(VDD_PIN) [list {vccd1}]
@@ -82,9 +78,11 @@ set ::env(GND_PIN) [list {vssd1}]
 ## Floorplan
 set ::env(FP_PIN_ORDER_CFG) $::env(DESIGN_DIR)/pin_order.cfg
 set ::env(FP_SIZING) absolute
-set ::env(DIE_AREA) "0 0 1500 1500 "
+set ::env(DIE_AREA) "0 0 1175 1175 "
 
-set ::env(PL_TARGET_DENSITY) 0.45
+set ::env(PL_TARGET_DENSITY) 0.47
+set ::env(GPL_CELL_PADDING) "2"
+set ::env(RUN_HEURISTIC_DIODE_INSERTION) "1"
 #set ::env(CELL_PAD) "4"
 
 ## Routing

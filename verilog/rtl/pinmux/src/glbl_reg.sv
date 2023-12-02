@@ -69,7 +69,8 @@ module glbl_reg (
                        output logic            cpu_intf_rst_n         ,
                        output logic            qspim_rst_n            ,
                        output logic            sspim_rst_n            ,
-                       output logic  [1:0]     uart_rst_n             ,
+                       output logic            sspis_rst_n            ,
+                       output logic  [2:0]     uart_rst_n             ,
                        output logic            i2cm_rst_n             ,
                        output logic            usbh_rst_n              ,
                        output logic            usbd_rst_n              ,
@@ -105,12 +106,6 @@ module glbl_reg (
 		               input   logic [2:0]      timer_intr            ,
 		               input   logic [31:0]     gpio_intr             ,
 
-                       // Digital PLL I/F
-                       output logic          cfg_pll_enb        , // Enable PLL
-                       output logic[4:0]     cfg_pll_fed_div    , // PLL feedback division ratio
-                       output logic          cfg_dco_mode       , // Run PLL in DCO mode
-                       output logic[25:0]    cfg_dc_trim        , // External trim for DCO mode
-                       output logic          pll_ref_clk        , // Input oscillator to match
 
                        output logic          dbg_clk_mon        ,
                        output logic          cfg_gpio_dgmode    
@@ -291,6 +286,8 @@ ctech_buf u_buf_cpu1_rst      (.A(cfg_rst_ctrl[9]),.X(cpu_core_rst_n[1]));
 ctech_buf u_buf_cpu2_rst      (.A(cfg_rst_ctrl[10]),.X(cpu_core_rst_n[2]));
 ctech_buf u_buf_cpu3_rst      (.A(cfg_rst_ctrl[11]),.X(cpu_core_rst_n[3]));
 
+ctech_buf u_buf_sspis_rst     (.A(cfg_rst_ctrl[12]),.X(sspis_rst_n));
+ctech_buf u_buf_uart2_rst     (.A(cfg_rst_ctrl[13]),.X(uart_rst_n[2]));
 
 
 //---------------------------------------------------------
@@ -476,45 +473,16 @@ wire [7:0] cfg_rtc_clk_ctrl     = reg_6[7:0];
 wire [7:0] cfg_usb_clk_ctrl     = reg_6[15:8];
 
 //-----------------------------------------
-// Reg-7: PLL Control-1
-// PLL register we don't want to reset during system reboot
+// Reg-7: 
 // ----------------------------------------
-gen_32b_reg  #(32'h8) u_reg_7	(
-	      //List of Inputs
-	      .reset_n    (p_reset_n     ),
-	      .clk        (mclk          ),
-	      .cs         (sw_wr_en_7   ),
-	      .we         (wr_be         ),		 
-	      .data_in    (sw_reg_wdata  ),
-	      
-	      //List of Outs
-	      .data_out   (reg_7       )
-	      );
 
-assign     cfg_pll_enb         = reg_7[3];
-wire [2:0] cfg_ref_pll_div     = reg_7[2:0];
+assign reg_7 = 'h0;
+
 //-----------------------------------------
-// Reg-2: PLL Control-2
-// PLL register we don't want to reset during system reboot
+// Reg-2: 
 // ----------------------------------------
-gen_32b_reg  #({1'b1,5'b00000,26'b0000000000000_1010101101001} ) u_reg_8	(
-	      //List of Inputs
-	      .reset_n    (p_reset_n     ),
-	      .clk        (mclk          ),
-	      .cs         (sw_wr_en_8   ),
-	      .we         (wr_be         ),		 
-	      .data_in    (sw_reg_wdata  ),
-	      
-	      //List of Outs
-	      .data_out   (reg_8       )
-	      );
 
-//------------------------------------------
-// PLL Trim Value
-//-----------------------------------------
-assign    cfg_dco_mode     = reg_8[31];
-assign    cfg_pll_fed_div  = reg_8[30:26];
-assign    cfg_dc_trim      = reg_8[25:0];
+assign reg_8 = 'h0;
 
 
 //------------------------------------------
@@ -797,16 +765,6 @@ clk_ctl #(4) u_usbclk (
        .clk_div_ratio (cfg_usb_clk_ratio)
    );
 
-// PLL Ref CLock
-
-clk_ctl #(2) u_pll_ref_clk (
-   // Outputs
-       .clk_o         (pll_ref_clk      ),
-   // Inputs
-       .mclk          (user_clock1      ),
-       .reset_n       (e_reset_n        ), 
-       .clk_div_ratio (cfg_ref_pll_div  )
-   );
 
 // Debug clock monitor optin
 wire  dbg_clk_ref       = (cfg_mon_sel == 4'b000) ? user_clock1    :

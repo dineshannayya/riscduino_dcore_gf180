@@ -184,12 +184,22 @@ assign strap_map = {
 //------------------------------------
 // Generating strap latch
 //------------------------------------
+`ifdef GF180NM // Latches are becaming unmapped cell in gf180
+always @ (posedge clk) begin 
+   if(e_reset_n == 1'b0) begin
+      strap_latch <=  pad_strap_in;
+   end
+end
+
+`else
 always_latch begin
   if ( ~e_reset_n )
   begin
     strap_latch =  pad_strap_in;
   end
 end
+
+`endif
 
 //--------------------------------------------
 // Software controller Strap Register

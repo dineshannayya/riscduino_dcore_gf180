@@ -80,7 +80,6 @@ set ::env(VERILOG_FILES) "\
     $::env(DESIGN_DIR)/../../verilog/rtl/lib/sync_fifo_occ.sv     \
     "
 
-set ::env(SYNTH_NO_FLAT) {1}
 set ::env(SYNTH_READ_BLACKBOX_LIB) 1
 set ::env(VERILOG_INCLUDE_DIRS) [glob $::env(DESIGN_DIR)/../../verilog/rtl/ $::env(DESIGN_DIR)/../../verilog/rtl/usb1_host/src/includes $::env(DESIGN_DIR)/../../verilog/rtl/usb1b_device/src/includes ]
 set ::env(SYNTH_DEFINES) [list SYNTHESIS GF180NM]
@@ -100,7 +99,7 @@ set ::env(GND_PIN) [list {vssd1}]
 
 set ::env(FP_PIN_ORDER_CFG) $::env(DESIGN_DIR)/pin_order.cfg
 set ::env(FP_SIZING) "absolute"
-set ::env(DIE_AREA) "0 0 800 800"
+set ::env(DIE_AREA) "0 0 600 1050"
 
 
 

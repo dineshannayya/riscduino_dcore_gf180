@@ -84,10 +84,12 @@ module wbi_top
          input logic            wbd_clk_int,
 	     output logic           wbd_clk_wi,
 
+         input logic            mclk_raw, // clock without any clk skew
          input logic		    clk_i, 
          input logic            rst_n,
 
          // Master 0 Interface
+         output  logic          m0_mclk,
          input   logic	[31:0]	m0_wbd_dat_i,
          input   logic  [31:0]	m0_wbd_adr_i,
          input   logic  [3:0]	m0_wbd_sel_i,
@@ -180,6 +182,7 @@ typedef struct packed {
   logic  [9:0]	wbd_bl;
   logic  	    wbd_we;
   logic  	    wbd_wval;
+  logic [3:0] 	wbd_tid;
 } type_wb_cmd_data_intf;
 
 typedef struct packed { 
@@ -219,11 +222,11 @@ type_wb_res_ctrl_intf m0d_res_ctrl;
 type_wb_wr_intf s0_wb_wr;
 type_wb_rd_intf s0_wb_rd;
 
-type_wb_cmd_data_intf s0m_cmd_data;
-type_wb_res_data_intf s0m_res_data;
+type_wb_cmd_data_intf s0p_cmd_data;
+type_wb_res_data_intf s0p_res_data;
 
-type_wb_cmd_ctrl_intf s0m_cmd_ctrl;
-type_wb_res_ctrl_intf s0m_res_ctrl;
+type_wb_cmd_ctrl_intf s0p_cmd_ctrl;
+type_wb_res_ctrl_intf s0p_res_ctrl;
 
 type_wb_cmd_data_intf s0d_cmd_data;
 type_wb_res_data_intf s0d_res_data;
@@ -235,11 +238,11 @@ type_wb_res_ctrl_intf s0d_res_ctrl;
 type_wb_wr_intf s1_wb_wr;
 type_wb_rd_intf s1_wb_rd;
 
-type_wb_cmd_data_intf s1m_cmd_data;
-type_wb_res_data_intf s1m_res_data;
+type_wb_cmd_data_intf s1p_cmd_data;
+type_wb_res_data_intf s1p_res_data;
 
-type_wb_cmd_ctrl_intf s1m_cmd_ctrl;
-type_wb_res_ctrl_intf s1m_res_ctrl;
+type_wb_cmd_ctrl_intf s1p_cmd_ctrl;
+type_wb_res_ctrl_intf s1p_res_ctrl;
 
 type_wb_cmd_data_intf s1d_cmd_data;
 type_wb_res_data_intf s1d_res_data;
@@ -251,11 +254,11 @@ type_wb_res_ctrl_intf s1d_res_ctrl;
 type_wb_wr_intf s2_wb_wr;
 type_wb_rd_intf s2_wb_rd;
 
-type_wb_cmd_data_intf s2m_cmd_data;
-type_wb_res_data_intf s2m_res_data;
+type_wb_cmd_data_intf s2p_cmd_data;
+type_wb_res_data_intf s2p_res_data;
 
-type_wb_cmd_ctrl_intf s2m_cmd_ctrl;
-type_wb_res_ctrl_intf s2m_res_ctrl;
+type_wb_cmd_ctrl_intf s2p_cmd_ctrl;
+type_wb_res_ctrl_intf s2p_res_ctrl;
 
 type_wb_cmd_data_intf s2d_cmd_data;
 type_wb_res_data_intf s2d_res_data;
@@ -284,6 +287,7 @@ clk_skew_adjust u_skew_wi
 /////////////////////////////////////////////////
 // Master-0 Mapping
 // ---------------------------------------------
+assign m0_mclk           =  mclk_raw;
 assign m0_wb_wr.wbd_dat  = m0_wbd_dat_i;
 assign m0_wb_wr.wbd_adr  = m0_wbd_adr_i;
 assign m0_wb_wr.wbd_sel  = m0_wbd_sel_i;
@@ -304,6 +308,7 @@ assign m0_wbd_err_o  = m0_wb_rd.wbd_err;
 //----------------------------------------
 // Slave-0 Port Mapping
 // -------------------------------------
+assign  s0_mclk      =  mclk_raw;
 assign  s0_wbd_dat_o =  s0_wb_wr.wbd_dat ;
 assign  s0_wbd_adr_o =  s0_wb_wr.wbd_adr ;
 assign  s0_wbd_sel_o =  s0_wb_wr.wbd_sel ;
@@ -321,6 +326,7 @@ assign s0_wb_rd.wbd_err  = 1'b0; // s0_wbd_err_i ; - unused
 //----------------------------------------
 // Slave-1 Port Mapping
 // -------------------------------------
+assign  s1_mclk      =  mclk_raw;
 assign  s1_wbd_dat_o =  s1_wb_wr.wbd_dat ;
 assign  s1_wbd_adr_o =  s1_wb_wr.wbd_adr[8:0] ;
 assign  s1_wbd_sel_o =  s1_wb_wr.wbd_sel ;
@@ -336,6 +342,7 @@ assign s1_wb_rd.wbd_err  = 1'b0; // s1_wbd_err_i ; - unused
 //----------------------------------------
 // Slave-2 Port Mapping
 // -------------------------------------
+assign  s2_mclk      =  mclk_raw;
 assign  s2_wbd_dat_o =  s2_wb_wr.wbd_dat ;
 assign  s2_wbd_adr_o =  s2_wb_wr.wbd_adr[10:0] ; // Global Reg Need 8 bit
 assign  s2_wbd_sel_o =  s2_wb_wr.wbd_sel ;
@@ -353,34 +360,33 @@ assign s2_wb_rd.wbd_err  = 1'b0; // s2_wbd_err_i ; - unused
 // Command Daisy Chain
 //------------------------------------------
 
-//Sticking First to Last Chain
-assign m0p_cmd_data = s2d_cmd_data;
-assign s2d_cmd_ctrl = m0p_cmd_ctrl;
-
-assign s2d_res_data = m0p_res_data;
-assign m0p_res_ctrl = s2d_res_ctrl;
-
-
 // M0 => S0
 assign s0p_cmd_data = m0d_cmd_data;
 assign m0d_cmd_ctrl = s0p_cmd_ctrl;
 
 assign m0d_res_data = s0p_res_data;
-assign s0p_res_ctrl = m0d_res_ctl;
+assign s0p_res_ctrl = m0d_res_ctrl;
 
 // S0 => S1
 assign s1p_cmd_data = s0d_cmd_data;
 assign s0d_cmd_ctrl = s1p_cmd_ctrl;
 
 assign s0d_res_data = s1p_res_data;
-assign s1p_res_ctrl = s0d_res_ctl;
+assign s1p_res_ctrl = s0d_res_ctrl;
 
 // S1 => S2
 assign s2p_cmd_data = s1d_cmd_data;
 assign s1d_cmd_ctrl = s2p_cmd_ctrl;
 
 assign s1d_res_data = s2p_res_data;
-assign s2p_res_ctrl = s1d_res_ctl;
+assign s2p_res_ctrl = s1d_res_ctrl;
+
+//S2 => M0 (Last chain to First chain)
+assign m0p_cmd_data = s2d_cmd_data;
+assign s2d_cmd_ctrl = m0p_cmd_ctrl;
+
+assign s2d_res_data = m0p_res_data;
+assign m0p_res_ctrl = s2d_res_ctrl;
 
 //----------------------------------------------------------
 // M0: WISHBONE HOST MASTER
@@ -470,22 +476,22 @@ wbi_slave_port
        .reset_n           ( rst_n                  ),  // Regular Reset signal
        .mclk              ( clk_i                  ),  // System clock
                                            
-       .wbm_cmd_wrdy_o    ( s0p_cmd_ctrl.wbd_wrdy  ),  // Ready path Ready to accept the data
-       .wbm_cmd_wval_i    ( s0p_cmd_data.wbd_wval  ),
-       .wbm_cmd_adr_i     ( s0p_cmd_data.wbd_adr   ),  // address
-       .wbm_cmd_we_i      ( s0p_cmd_data.wbd_we    ),  // write
-       .wbm_cmd_dat_i     ( s0p_cmd_data.wbd_dat   ),  // data output
-       .wbm_cmd_sel_i     ( s0p_cmd_data.wbd_sel   ),  // byte enable
-       .wbm_cmd_tid_i     ( s0p_cmd_data.wbd_tid   ),
-       .wbm_cmd_bl_i      ( s0p_cmd_data.wbd_bl    ),  // Burst Count
-                                        
-       .wbm_res_rrdy_i    ( s0p_res_ctrl.wbd_rrdy  ),  // Ready path Ready to accept the data
-       .wbm_res_rval_o    ( s0p_res_data.wbd_rval  ),
-       .wbm_res_dat_o     ( s0p_res_data.wbd_dat   ),  // data input
-       .wbm_res_ack_o     ( s0p_res_data.wbd_ack   ),  // acknowlegement
-       .wbm_res_lack_o    ( s0p_res_data.wbd_lack  ),  // Last Burst access
-       .wbm_res_err_o     ( s0p_res_data.wbd_err   ),  // error
-       .wbm_res_tid_o     ( s0p_res_data.wbd_tid   ),
+       .wbp_cmd_wrdy_o    ( s0p_cmd_ctrl.wbd_wrdy  ),  // Ready path Ready to accept the data
+       .wbp_cmd_wval_i    ( s0p_cmd_data.wbd_wval  ),
+       .wbp_cmd_adr_i     ( s0p_cmd_data.wbd_adr   ),  // address
+       .wbp_cmd_we_i      ( s0p_cmd_data.wbd_we    ),  // write
+       .wbp_cmd_dat_i     ( s0p_cmd_data.wbd_dat   ),  // data output
+       .wbp_cmd_sel_i     ( s0p_cmd_data.wbd_sel   ),  // byte enable
+       .wbp_cmd_tid_i     ( s0p_cmd_data.wbd_tid   ),
+       .wbp_cmd_bl_i      ( s0p_cmd_data.wbd_bl    ),  // Burst Count
+                                       
+       .wbp_res_rrdy_i    ( s0p_res_ctrl.wbd_rrdy  ),  // Ready path Ready to accept the data
+       .wbp_res_rval_o    ( s0p_res_data.wbd_rval  ),
+       .wbp_res_dat_o     ( s0p_res_data.wbd_dat   ),  // data input
+       .wbp_res_ack_o     ( s0p_res_data.wbd_ack   ),  // acknowlegement
+       .wbp_res_lack_o    ( s0p_res_data.wbd_lack  ),  // Last Burst access
+       .wbp_res_err_o     ( s0p_res_data.wbd_err   ),  // error
+       .wbp_res_tid_o     ( s0p_res_data.wbd_tid   ),
                                            
        .wbd_cmd_wrdy_i    ( s0d_cmd_ctrl.wbd_wrdy  ),  // Ready path Ready to accept the data
        .wbd_cmd_wval_o    ( s0d_cmd_data.wbd_wval  ),
@@ -547,22 +553,22 @@ wbi_slave_port
        .reset_n           ( rst_n                  ),  // Regular Reset signal
        .mclk              ( clk_i                  ),  // System clock
                                            
-       .wbm_cmd_wrdy_o    ( s1m_cmd_ctrl.wbd_wrdy  ),  // Ready path Ready to accept the data
-       .wbm_cmd_wval_i    ( s1m_cmd_data.wbd_wval  ),
-       .wbm_cmd_adr_i     ( s1m_cmd_data.wbd_adr   ),  // address
-       .wbm_cmd_we_i      ( s1m_cmd_data.wbd_we    ),  // write
-       .wbm_cmd_dat_i     ( s1m_cmd_data.wbd_dat   ),  // data output
-       .wbm_cmd_sel_i     ( s1m_cmd_data.wbd_sel   ),  // byte enable
-       .wbm_cmd_tid_i     ( s1m_cmd_data.wbd_tid   ),
-       .wbm_cmd_bl_i      ( s1m_cmd_data.wbd_bl    ),  // Burst Count
-                                        
-       .wbm_res_rrdy_i    ( s1m_res_ctrl.wbd_rrdy  ),  // Ready path Ready to accept the data
-       .wbm_res_rval_o    ( s1m_res_data.wbd_rval  ),
-       .wbm_res_dat_o     ( s1m_res_data.wbd_dat   ),  // data input
-       .wbm_res_ack_o     ( s1m_res_data.wbd_ack   ),  // acknowlegement
-       .wbm_res_lack_o    ( s1m_res_data.wbd_lack  ),  // Last Burst access
-       .wbm_res_err_o     ( s1m_res_data.wbd_err   ),  // error
-       .wbm_res_tid_o     ( s1m_res_data.wbd_tid   ),
+       .wbp_cmd_wrdy_o    ( s1p_cmd_ctrl.wbd_wrdy  ),  // Ready path Ready to accept the data
+       .wbp_cmd_wval_i    ( s1p_cmd_data.wbd_wval  ),
+       .wbp_cmd_adr_i     ( s1p_cmd_data.wbd_adr   ),  // address
+       .wbp_cmd_we_i      ( s1p_cmd_data.wbd_we    ),  // write
+       .wbp_cmd_dat_i     ( s1p_cmd_data.wbd_dat   ),  // data output
+       .wbp_cmd_sel_i     ( s1p_cmd_data.wbd_sel   ),  // byte enable
+       .wbp_cmd_tid_i     ( s1p_cmd_data.wbd_tid   ),
+       .wbp_cmd_bl_i      ( s1p_cmd_data.wbd_bl    ),  // Burst Count
+                                      
+       .wbp_res_rrdy_i    ( s1p_res_ctrl.wbd_rrdy  ),  // Ready path Ready to accept the data
+       .wbp_res_rval_o    ( s1p_res_data.wbd_rval  ),
+       .wbp_res_dat_o     ( s1p_res_data.wbd_dat   ),  // data input
+       .wbp_res_ack_o     ( s1p_res_data.wbd_ack   ),  // acknowlegement
+       .wbp_res_lack_o    ( s1p_res_data.wbd_lack  ),  // Last Burst access
+       .wbp_res_err_o     ( s1p_res_data.wbd_err   ),  // error
+       .wbp_res_tid_o     ( s1p_res_data.wbd_tid   ),
                                            
        .wbd_cmd_wrdy_i    ( s1d_cmd_ctrl.wbd_wrdy  ),  // Ready path Ready to accept the data
        .wbd_cmd_wval_o    ( s1d_cmd_data.wbd_wval  ),
@@ -624,22 +630,22 @@ wbi_slave_port
        .reset_n           ( rst_n                  ),  // Regular Reset signal
        .mclk              ( clk_i                  ),  // System clock
                                            
-       .wbm_cmd_wrdy_o    ( s2m_cmd_ctrl.wbd_wrdy  ),  // Ready path Ready to accept the data
-       .wbm_cmd_wval_i    ( s2m_cmd_data.wbd_wval  ),
-       .wbm_cmd_adr_i     ( s2m_cmd_data.wbd_adr   ),  // address
-       .wbm_cmd_we_i      ( s2m_cmd_data.wbd_we    ),  // write
-       .wbm_cmd_dat_i     ( s2m_cmd_data.wbd_dat   ),  // data output
-       .wbm_cmd_sel_i     ( s2m_cmd_data.wbd_sel   ),  // byte enable
-       .wbm_cmd_tid_i     ( s2m_cmd_data.wbd_tid   ),
-       .wbm_cmd_bl_i      ( s2m_cmd_data.wbd_bl    ),  // Burst Count
-                                       
-       .wbm_res_rrdy_i    ( s2m_res_ctrl.wbd_rrdy  ),  // Ready path Ready to accept the data
-       .wbm_res_rval_o    ( s2m_res_data.wbd_rval  ),
-       .wbm_res_dat_o     ( s2m_res_data.wbd_dat   ),  // data input
-       .wbm_res_ack_o     ( s2m_res_data.wbd_ack   ),  // acknowlegement
-       .wbm_res_lack_o    ( s2m_res_data.wbd_lack  ),  // Last Burst access
-       .wbm_res_err_o     ( s2m_res_data.wbd_err   ),  // error
-       .wbm_res_tid_o     ( s2m_res_data.wbd_tid   ),
+       .wbp_cmd_wrdy_o    ( s2p_cmd_ctrl.wbd_wrdy  ),  // Ready path Ready to accept the data
+       .wbp_cmd_wval_i    ( s2p_cmd_data.wbd_wval  ),
+       .wbp_cmd_adr_i     ( s2p_cmd_data.wbd_adr   ),  // address
+       .wbp_cmd_we_i      ( s2p_cmd_data.wbd_we    ),  // write
+       .wbp_cmd_dat_i     ( s2p_cmd_data.wbd_dat   ),  // data output
+       .wbp_cmd_sel_i     ( s2p_cmd_data.wbd_sel   ),  // byte enable
+       .wbp_cmd_tid_i     ( s2p_cmd_data.wbd_tid   ),
+       .wbp_cmd_bl_i      ( s2p_cmd_data.wbd_bl    ),  // Burst Count
+                                     
+       .wbp_res_rrdy_i    ( s2p_res_ctrl.wbd_rrdy  ),  // Ready path Ready to accept the data
+       .wbp_res_rval_o    ( s2p_res_data.wbd_rval  ),
+       .wbp_res_dat_o     ( s2p_res_data.wbd_dat   ),  // data input
+       .wbp_res_ack_o     ( s2p_res_data.wbd_ack   ),  // acknowlegement
+       .wbp_res_lack_o    ( s2p_res_data.wbd_lack  ),  // Last Burst access
+       .wbp_res_err_o     ( s2p_res_data.wbd_err   ),  // error
+       .wbp_res_tid_o     ( s2p_res_data.wbd_tid   ),
                                           
        .wbd_cmd_wrdy_i    ( s2d_cmd_ctrl.wbd_wrdy  ),  // Ready path Ready to accept the data
        .wbd_cmd_wval_o    ( s2d_cmd_data.wbd_wval  ),

@@ -79,7 +79,7 @@ module uart_wrapper
    input logic	       wbd_clk_int,
    output logic	       wbd_clk_uart,
 
-   input logic  [1:0]  uart_rstn  , // async reset
+   input logic  [2:0]  uart_rstn  , // async reset
    input logic         app_clk     ,
 
         // Reg Bus Interface Signal
@@ -93,9 +93,22 @@ module uart_wrapper
    output logic [31:0] reg_rdata,
    output logic        reg_ack,
 
+   // Wb Master I/F
+   output  logic        wbm_uart_cyc_o       ,  // strobe/request
+   output  logic        wbm_uart_stb_o       ,  // strobe/request
+   output  logic [31:0] wbm_uart_adr_o       ,  // address
+   output  logic        wbm_uart_we_o        ,  // write
+   output  logic [31:0] wbm_uart_dat_o       ,  // data output
+   output  logic [3:0]  wbm_uart_sel_o       ,  // byte enable
+   input   logic [31:0] wbm_uart_dat_i       ,  // data input
+   input   logic        wbm_uart_ack_i       ,  // acknowlegement
+   input   logic        wbm_uart_err_i       ,  // error
+
+
+
    // UART I/F
-   input  logic  [1:0] uart_rxd               , 
-   output logic  [1:0] uart_txd               
+   input  logic  [2:0] uart_rxd               , 
+   output logic  [2:0] uart_txd               
 
      );
 
@@ -119,8 +132,10 @@ clk_skew_adjust u_skew_uart
 //  --------------------------------------
 logic [7:0]   reg_uart0_rdata;
 logic [7:0]   reg_uart1_rdata;
+logic [7:0]   reg_uart2_rdata;
 logic         reg_uart0_ack;
 logic         reg_uart1_ack;
+logic         reg_uart2_ack;
 
 //------------------------------
 // Reset Sync
@@ -150,12 +165,15 @@ end
 
 
 assign reg_rdata = (reg_blk_sel == `SEL_UART0) ? {24'h0,reg_uart0_rdata} : 
-	               (reg_blk_sel == `SEL_UART1) ? {24'h0,reg_uart1_rdata} : 'h0;
+	               (reg_blk_sel == `SEL_UART1) ? {24'h0,reg_uart1_rdata} : 
+	               (reg_blk_sel == `SEL_UART2) ? {24'h0,reg_uart2_rdata} : 'h0;
 assign reg_ack   = (reg_blk_sel == `SEL_UART0) ? reg_uart0_ack   : 
-	               (reg_blk_sel == `SEL_UART1) ? reg_uart1_ack   : 1'b0;
+	               (reg_blk_sel == `SEL_UART1) ? reg_uart1_ack   : 
+	               (reg_blk_sel == `SEL_UART2) ? reg_uart2_ack   : 1'b0;
 
 wire reg_uart0_cs  = (reg_blk_sel == `SEL_UART0) ? reg_cs : 1'b0;
 wire reg_uart1_cs  = (reg_blk_sel == `SEL_UART1) ? reg_cs : 1'b0;
+wire reg_uart2_cs  = (reg_blk_sel == `SEL_UART2) ? reg_cs : 1'b0;
 
 uart_core  u_uart0_core (  
 
@@ -197,6 +215,41 @@ uart_core  u_uart1_core (
             // Pad Control
         .rxd          (uart_rxd[1]     ),
         .txd          (uart_txd[1]     )
+     );
+
+
+
+uartms_top u_uart2_core (  
+        .arst_n      (uart_rstn[2]     ), // async reset
+        .app_clk     (app_clk          ),
+
+        // Reg Bus Interface Signal
+        .reg_cs      (reg_uart2_cs     ),
+        .reg_wr      (reg_wr           ),
+        .reg_addr    (reg_addr[5:2]    ),
+        .reg_wdata   (reg_wdata[7:0]   ),
+        .reg_be      (reg_be[0]        ),
+
+        // Outputs
+        .reg_rdata   (reg_uart2_rdata[7:0]),
+        .reg_ack     (reg_uart2_ack    ),
+
+
+    // Master Port
+        .wbm_cyc_o       (wbm_uart_cyc_o      ),  // strobe/request
+        .wbm_stb_o       (wbm_uart_stb_o      ),  // strobe/request
+        .wbm_adr_o       (wbm_uart_adr_o      ),  // address
+        .wbm_we_o        (wbm_uart_we_o       ),  // write
+        .wbm_dat_o       (wbm_uart_dat_o      ),  // data output
+        .wbm_sel_o       (wbm_uart_sel_o      ),  // byte enable
+        .wbm_dat_i       (wbm_uart_dat_i      ),  // data input
+        .wbm_ack_i       (wbm_uart_ack_i      ),  // acknowlegement
+        .wbm_err_i       (wbm_uart_err_i      ),  // error
+
+       // Line Interface
+        .rxd          (uart_rxd[2]     ),
+        .txd          (uart_txd[2]     )
+
      );
 
 

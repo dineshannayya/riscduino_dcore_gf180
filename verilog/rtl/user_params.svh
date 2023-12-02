@@ -140,11 +140,12 @@ system strap decoding
 
 // UART/I2C/SPI Decodeing
 `define SEL_UART0 3'b000
-`define SEL_I2C   3'b001
+`define SEL_I2CM  3'b001
 `define SEL_USBH  3'b010
 `define SEL_SPIM  3'b011
 `define SEL_UART1 3'b100
 `define SEL_USBD  3'b101
+`define SEL_UART2 3'b110
 
 
 //PWM Configuration

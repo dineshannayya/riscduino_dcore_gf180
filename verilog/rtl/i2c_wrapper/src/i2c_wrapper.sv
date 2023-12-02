@@ -1,4 +1,3 @@
-
 //////////////////////////////////////////////////////////////////////////////
 // SPDX-FileCopyrightText: 2021 , Dinesh Annayya                          
 // 
@@ -18,25 +17,24 @@
 //
 //////////////////////////////////////////////////////////////////////
 ////                                                              ////
-////  integrated USB1.1 Host & Device                             ////
+////  integrated  Master/Slave I2c                                ////
 ////                                                              ////
 ////                                                              ////
 ////  This file is part of the riscduino cores project            ////
 ////  https://github.com/dineshannayya/riscduino.git              ////
 ////                                                              ////
-////  Description: This module integarte                          ////
-////   USB 1.1 Host/Device.                                       ////
+////  Description: This module integarte sspi                     ////
 ////                                                              ////
 ////                                                              ////
 ////  To Do:                                                      ////
 ////    nothing                                                   ////
 ////                                                              ////
 ////  Author(s):                                                  ////
-////      - Dinesh Annayya, dinesh.annayya@gmail.com              ////
+////      - Dinesh Annayya, dinesha@opencores.org                 ////
 ////                                                              ////
 ////  Revision :                                                  ////
-////         0.1 - 24 Nov 2023, Dinesh-A                          ////
-////                Initial Version                               ////
+////         0.1 - 29 Nov 2023, Dinesh-A                          ////
+////               initial version                                ////
 //////////////////////////////////////////////////////////////////////
 ////                                                              ////
 //// Copyright (C) 2000 Authors and OPENCORES.ORG                 ////
@@ -64,8 +62,9 @@
 ////                                                              ////
 //////////////////////////////////////////////////////////////////////
 
+
 `include "user_params.svh"
-module usb_wrapper 
+module i2c_wrapper 
 
      (  
 `ifdef USE_POWER_PINS
@@ -74,81 +73,76 @@ module usb_wrapper
 `endif
    input logic         reset_n, // global reset
     // clock skew adjust
-   input logic [3:0]   cfg_cska_usb,
+   input logic [3:0]   cfg_cska_i2c,
    input logic	       wbd_clk_int,
-   output logic	       wbd_clk_skew,
+   output logic	       wbd_clk_i2c,
 
-   input logic         usbh_rstn  ,  // async reset
-   input logic         usbd_rstn  ,  // async reset
-   input logic         app_clk    ,
-   input logic         usb_clk    ,   // 48Mhz usb clock
+   input logic  [1:0]  i2c_rstn    , // async reset
+   input logic         app_clk     ,
 
-        // Reg Bus Interface Signal
-   input logic         reg_cs,
-   input logic         reg_wr,
-   input logic [8:0]   reg_addr,
-   input logic [31:0]  reg_wdata,
-   input logic [3:0]   reg_be,
+   // Reg Bus Slave Interface Signal
+   input logic         reg_slv_cs,
+   input logic         reg_slv_wr,
+   input logic [8:0]   reg_slv_addr,
+   input logic [31:0]  reg_slv_wdata,
+   input logic [3:0]   reg_slv_be,
 
-        // Outputs
-   output logic [31:0] reg_rdata,
-   output logic        reg_ack,
+   // Outputs
+   output logic [31:0] reg_slv_rdata,
+   output logic        reg_slv_ack,
 
-   // USB 1.1 HOST I/F
-   input  logic        usbh_in_dp              ,
-   input  logic        usbh_in_dn              ,
-
-   output logic        usbh_out_dp             ,
-   output logic        usbh_out_dn             ,
-   output logic        usbh_out_tx_oen         ,
+   /////////////////////////////////////////////////////////
+   // i2c interface
+   ///////////////////////////////////////////////////////
+   input logic         scl_pad_i              , // SCL-line input
+   output logic        scl_pad_o              , // SCL-line output (always 1'b0)
+   output logic        scl_pad_oen_o          , // SCL-line output enable (active low)
    
-   output logic        usbh_intr_o            ,
+   input logic         sda_pad_i              , // SDA-line input
+   output logic        sda_pad_o              , // SDA-line output (always 1'b0)
+   output logic        sda_padoen_o           , // SDA-line output enable (active low)
 
-   // USB 1.1 DEVICE I/F
-   input  logic        usbd_in_dp              ,
-   input  logic        usbd_in_dn              ,
+   output logic        i2cm_intr_o            
 
-   output logic        usbd_out_dp             ,
-   output logic        usbd_out_dn             ,
-   output logic        usbd_out_tx_oen         ,
-   
-   output logic        usbd_intr_o            
+
+
+
 
 
      );
 
-// uart clock skew control
-clk_skew_adjust u_skew_uart
+// sspi clock skew control
+clk_skew_adjust u_skew_i2c
        (
 `ifdef USE_POWER_PINS
                .vccd1      (vccd1                      ),// User area 1 1.8V supply
                .vssd1      (vssd1                      ),// User area 1 digital ground
 `endif
-	       .clk_in     (wbd_clk_int                ), 
-	       .sel        (cfg_cska_usb               ), 
-	       .clk_out    (wbd_clk_skew                ) 
+	       .clk_in         (wbd_clk_int                ), 
+	       .sel            (cfg_cska_i2c               ), 
+	       .clk_out        (wbd_clk_i2c                ) 
        );
+
+
 
 
 //----------------------------------------
 //  Register Response Path Mux
 //  --------------------------------------
-logic [31:0]  reg_usbh_rdata;
-logic [31:0]  reg_usbd_rdata;
-logic         reg_usbh_ack;
-logic         reg_usbd_ack;
+logic [7:0]  reg_i2cm_rdata;
+logic         reg_i2cm_ack;
 
-
+//------------------------------
 // Reset Sync
+//------------------------------
 logic         reset_ssn             ;  // Sync Reset
+
 reset_sync  u_rst_sync (
 	      .scan_mode  (1'b0         ),
           .dclk       (app_clk      ), // Destination clock domain
 	      .arst_n     (reset_n      ), // active low async reset
           .srst_n     (reset_ssn    )
           );
-
-
 //-------------------------------------------------
 // Register Block Selection Logic, to break address => Ack timing path
 //-------------------------------------------------
@@ -160,83 +154,43 @@ begin
      reg_blk_sel <= 'h0;
    end
    else begin
-      if(reg_cs) reg_blk_sel <= reg_addr[8:6];
+      if(reg_slv_cs) reg_blk_sel <= reg_slv_addr[8:6];
    end
 end
 
-assign reg_rdata   = (reg_blk_sel == `SEL_USBH) ? reg_usbh_rdata : 
-	                 (reg_blk_sel == `SEL_USBD) ? reg_usbd_rdata : 'h0;
-assign reg_ack     = (reg_blk_sel == `SEL_USBH) ? reg_usbh_ack  :
-	                 (reg_blk_sel == `SEL_USBD) ? reg_usbd_ack  : 1'b0;
-
-wire reg_usbh_cs   = (reg_blk_sel == `SEL_USBH) ? reg_cs : 1'b0;
-wire reg_usbd_cs   = (reg_blk_sel == `SEL_USBD) ? reg_cs : 1'b0;
 
 
-//----------------------------------
-// USB 1.1 HOST
-//----------------------------------
+assign reg_slv_rdata   = (reg_blk_sel == `SEL_I2CM) ? {24'h0,reg_i2cm_rdata} : 'h0;
+assign reg_slv_ack     = (reg_blk_sel == `SEL_I2CM) ? reg_i2cm_ack   : 1'b0;
 
-usb1_host u_usb_host (
-    .usb_clk_i      (usb_clk        ),
-    .usb_rstn_i     (usbh_rstn      ),
+wire reg_i2cm_cs  = (reg_blk_sel == `SEL_I2CM) ? reg_slv_cs : 1'b0;
 
-    // USB D+/D-
-    .in_dp          (usbh_in_dp     ),
-    .in_dn          (usbh_in_dn     ),
+i2cm_top  u_i2cm (
+	// wishbone signals
+	.wb_clk_i      (app_clk            ), // master clock input
+	.sresetn       (1'b1               ), // synchronous reset
+	.aresetn       (i2c_rstn[0]        ), // asynchronous reset
+	.wb_adr_i      (reg_slv_addr[4:2]  ), // lower address bits
+	.wb_dat_i      (reg_slv_wdata[7:0] ), // databus input
+	.wb_dat_o      (reg_i2cm_rdata     ), // databus output
+	.wb_we_i       (reg_slv_wr         ), // write enable input
+	.wb_stb_i      (reg_i2cm_cs        ), // stobe/core select signal
+	.wb_cyc_i      (reg_i2cm_cs        ), // valid bus cycle input
+	.wb_ack_o      (reg_i2cm_ack       ), // bus cycle acknowledge output
+	.wb_inta_o     (i2cm_intr_o        ), // interrupt request signal output
 
-    .out_dp         (usbh_out_dp    ),
-    .out_dn         (usbh_out_dn    ),
-    .out_tx_oen     (usbh_out_tx_oen),
+	// I2C signals
+	// i2c clock line
+	.scl_pad_i     (scl_pad_i          ), // SCL-line input
+	.scl_pad_o     (scl_pad_o          ), // SCL-line output (always 1'b0)
+	.scl_padoen_o  (scl_pad_oen_o      ), // SCL-line output enable (active low)
 
-    // Master Port
-    .wbm_rst_n      (usbh_rstn      ),  // Regular Reset signal
-    .wbm_clk_i      (app_clk        ),  // System clock
-    .wbm_stb_i      (reg_usbh_cs    ),  // strobe/request
-    .wbm_adr_i      (reg_addr[5:0]  ),  // address
-    .wbm_we_i       (reg_wr         ),  // write
-    .wbm_dat_i      (reg_wdata      ),  // data output
-    .wbm_sel_i      (reg_be         ),  // byte enable
-    .wbm_dat_o      (reg_usbh_rdata ),  // data input
-    .wbm_ack_o      (reg_usbh_ack   ),  // acknowlegement
-    .wbm_err_o      (               ),  // error
+	// i2c data line
+	.sda_pad_i     (sda_pad_i          ), // SDA-line input
+	.sda_pad_o     (sda_pad_o          ), // SDA-line output (always 1'b0)
+	.sda_padoen_o  (sda_padoen_o       )  // SDA-line output enable (active low)
 
-    // Outputs
-    .usb_intr_o    ( usbh_intr_o    )
-
-    );
-
-//----------------------------------
-// USB 1.1 Device
-//----------------------------------
-
-usb1bd_top  u_usb_device(
-     .usb_clk      (usb_clk), 
-     .app_clk      (app_clk), 
-     .arst_n       (usbd_rstn),
-
-     // Transciever Interface
-     .usb_txoe     (usbd_out_tx_oen), // USB TX OEN, Output driven at txoe=0
-     .usb_txdp     (usbd_out_dp),
-     .usb_txdn     (usbd_out_dn),
-
-     .usb_rxdp     (usbd_in_dp),
-     .usb_rxdn     (usbd_in_dn),
-
-	// Register Interface
-
-     .app_reg_req     (reg_usbd_cs),
-     .app_reg_addr    (reg_addr[5:2]),
-     .app_reg_we      (reg_wr),
-     .app_reg_be      (reg_be),
-     .app_reg_wdata   (reg_wdata),
-
-	 .app_reg_rdata   (reg_usbd_rdata),
-	 .app_reg_ack     (reg_usbd_ack),
-
-     .usb_irq         (usbd_intr_o)
-
-        );      
+         );
 
 
 endmodule

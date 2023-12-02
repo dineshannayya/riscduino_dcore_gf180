@@ -86,23 +86,23 @@ module wbi_slave_port
        input   logic               mclk            ,  // System clock
 
     // Master Command Port
-       output  logic               wbm_cmd_wrdy_o  ,  // Ready path Ready to accept the data
-       input   logic               wbm_cmd_wval_i  ,
-       input   logic [AW-1:0]      wbm_cmd_adr_i   ,  // address
-       input   logic               wbm_cmd_we_i    ,  // write
-       input   logic [DW-1:0]      wbm_cmd_dat_i   ,  // data output
-       input   logic [BW-1:0]      wbm_cmd_sel_i   ,  // byte enable
-       input   logic [3:0]         wbm_cmd_tid_i   ,
-       input   logic [BL-1:0]      wbm_cmd_bl_i    ,  // Burst Count
+       output  logic               wbp_cmd_wrdy_o  ,  // Ready path Ready to accept the data
+       input   logic               wbp_cmd_wval_i  ,
+       input   logic [AW-1:0]      wbp_cmd_adr_i   ,  // address
+       input   logic               wbp_cmd_we_i    ,  // write
+       input   logic [DW-1:0]      wbp_cmd_dat_i   ,  // data output
+       input   logic [BW-1:0]      wbp_cmd_sel_i   ,  // byte enable
+       input   logic [3:0]         wbp_cmd_tid_i   ,
+       input   logic [BL-1:0]      wbp_cmd_bl_i    ,  // Burst Count
 
     // Master Response Port
-       input   logic               wbm_res_rrdy_i  ,  // Ready path Ready to accept the data
-       output  logic               wbm_res_rval_o  ,
-       output  logic [DW-1:0]      wbm_res_dat_o   ,  // data input
-       output  logic               wbm_res_ack_o   ,  // acknowlegement
-       output  logic               wbm_res_lack_o  ,  // Last Burst access
-       output  logic               wbm_res_err_o   ,  // error
-       output  logic [3:0]         wbm_res_tid_o   ,
+       input   logic               wbp_res_rrdy_i  ,  // Ready path Ready to accept the data
+       output  logic               wbp_res_rval_o  ,
+       output  logic [DW-1:0]      wbp_res_dat_o   ,  // data input
+       output  logic               wbp_res_ack_o   ,  // acknowlegement
+       output  logic               wbp_res_lack_o  ,  // Last Burst access
+       output  logic               wbp_res_err_o   ,  // error
+       output  logic [3:0]         wbp_res_tid_o   ,
 
    // Next Daisy Chain Command
        input    logic               wbd_cmd_wrdy_i  ,  // Ready path Ready to accept the data
@@ -154,9 +154,9 @@ logic  slv_cmd_wrdy_o;
 logic  stg_cmd_wval_i;
 logic  stg_cmd_wrdy_o;
 
-assign slv_cmd_wval_i   = (func_check_match(wbm_cmd_wval_i,wbm_cmd_adr_i) == ADDR_MATCH);
-assign stg_cmd_wval_i  = wbm_cmd_wval_i && !slv_cmd_wval_i;
-assign wbm_cmd_wrdy_o  = slv_cmd_wval_i ?  slv_cmd_wrdy_o: stg_cmd_wrdy_o;
+assign slv_cmd_wval_i   = (func_check_match(wbp_cmd_wval_i,wbp_cmd_adr_i) == ADDR_MATCH);
+assign stg_cmd_wval_i  = wbp_cmd_wval_i && !slv_cmd_wval_i;
+assign wbp_cmd_wrdy_o  = slv_cmd_wval_i ?  slv_cmd_wrdy_o: stg_cmd_wrdy_o;
 
 //-------------------------------------------
 // Response Path Control Generation
@@ -184,14 +184,14 @@ wbi_arb2 u_wbi_arb(
         );
 
 
-assign slv_res_rrdy_i = (wbi_grnt == 1'b0) ?  wbm_res_rrdy_i : 1'b0;
-assign stg_res_rrdy_i = (wbi_grnt == 1'b1) ?  wbm_res_rrdy_i : 1'b0;
-assign wbm_res_rval_o = (wbi_grnt == 1'b0) ?  slv_res_rval_o : stg_res_rval_o ;
-assign wbm_res_dat_o  = (wbi_grnt == 1'b0) ?  slv_res_dat_o  : stg_res_dat_o  ; 
-assign wbm_res_ack_o  = (wbi_grnt == 1'b0) ?  slv_res_ack_o  : stg_res_ack_o  ; 
-assign wbm_res_lack_o = (wbi_grnt == 1'b0) ?  slv_res_lack_o : stg_res_lack_o ; 
-assign wbm_res_err_o  = (wbi_grnt == 1'b0) ?  slv_res_err_o  : stg_res_err_o  ; 
-assign wbm_res_tid_o  = (wbi_grnt == 1'b0) ?  slv_res_tid_o  : stg_res_tid_o  ; 
+assign slv_res_rrdy_i = (wbi_grnt == 1'b0) ?  wbp_res_rrdy_i : 1'b0;
+assign stg_res_rrdy_i = (wbi_grnt == 1'b1) ?  wbp_res_rrdy_i : 1'b0;
+assign wbp_res_rval_o = (wbi_grnt == 1'b0) ?  slv_res_rval_o : stg_res_rval_o ;
+assign wbp_res_dat_o  = (wbi_grnt == 1'b0) ?  slv_res_dat_o  : stg_res_dat_o  ; 
+assign wbp_res_ack_o  = (wbi_grnt == 1'b0) ?  slv_res_ack_o  : stg_res_ack_o  ; 
+assign wbp_res_lack_o = (wbi_grnt == 1'b0) ?  slv_res_lack_o : stg_res_lack_o ; 
+assign wbp_res_err_o  = (wbi_grnt == 1'b0) ?  slv_res_err_o  : stg_res_err_o  ; 
+assign wbp_res_tid_o  = (wbi_grnt == 1'b0) ?  slv_res_tid_o  : stg_res_tid_o  ; 
 
 
 
@@ -203,12 +203,12 @@ wbi_slave_node u_node(
          // WishBone Input master I/P
          .wbm_cmd_wrdy_o       (slv_cmd_wrdy_o      ),
          .wbm_cmd_val_i        (slv_cmd_wval_i      ),
-         .wbm_cmd_adr_i        (wbm_cmd_adr_i       ),
-         .wbm_cmd_sel_i        (wbm_cmd_sel_i       ),
-         .wbm_cmd_we_i         (wbm_cmd_we_i        ),
-         .wbm_cmd_dat_i        (wbm_cmd_dat_i       ),
-         .wbm_cmd_bl_i         (wbm_cmd_bl_i        ),
-         .wbm_cmd_tid_i        (wbm_cmd_tid_i       ),
+         .wbm_cmd_adr_i        (wbp_cmd_adr_i       ),
+         .wbm_cmd_sel_i        (wbp_cmd_sel_i       ),
+         .wbm_cmd_we_i         (wbp_cmd_we_i        ),
+         .wbm_cmd_dat_i        (wbp_cmd_dat_i       ),
+         .wbm_cmd_bl_i         (wbp_cmd_bl_i        ),
+         .wbm_cmd_tid_i        (wbp_cmd_tid_i       ),
 
          .wbm_res_rrdy_i       (slv_res_rrdy_i      ),
          .wbm_res_rval_o       (slv_res_rval_o      ),
@@ -244,23 +244,23 @@ wbi_stagging  u_stagging (
        .mclk                   (mclk               ),  // System clock
 
     // Master Command Port
-       .wbm_cmd_wrdy_o        (stg_cmd_wrdy_o      ),  // Ready path Ready to accept the data
-       .wbm_cmd_wval_i        (stg_cmd_wval_i      ),
-       .wbm_cmd_adr_i         (wbm_cmd_adr_i       ),  // address
-       .wbm_cmd_we_i          (wbm_cmd_we_i        ),  // write
-       .wbm_cmd_dat_i         (wbm_cmd_dat_i       ),  // data output
-       .wbm_cmd_sel_i         (wbm_cmd_sel_i       ),  // byte enable
-       .wbm_cmd_tid_i         (wbm_cmd_tid_i       ),
-       .wbm_cmd_bl_i          (wbm_cmd_bl_i        ),  // Burst Count
+       .wbp_cmd_wrdy_o        (stg_cmd_wrdy_o      ),  // Ready path Ready to accept the data
+       .wbp_cmd_wval_i        (stg_cmd_wval_i      ),
+       .wbp_cmd_adr_i         (wbp_cmd_adr_i       ),  // address
+       .wbp_cmd_we_i          (wbp_cmd_we_i        ),  // write
+       .wbp_cmd_dat_i         (wbp_cmd_dat_i       ),  // data output
+       .wbp_cmd_sel_i         (wbp_cmd_sel_i       ),  // byte enable
+       .wbp_cmd_tid_i         (wbp_cmd_tid_i       ),
+       .wbp_cmd_bl_i          (wbp_cmd_bl_i        ),  // Burst Count
 
     // Master Response Port
-       .wbm_res_rrdy_i        (stg_res_rrdy_i      ),  // Ready path Ready to accept the data
-       .wbm_res_rval_o        (stg_res_rval_o      ),
-       .wbm_res_dat_o         (stg_res_dat_o       ),  // data input
-       .wbm_res_ack_o         (stg_res_ack_o       ),  // acknowlegement
-       .wbm_res_lack_o        (stg_res_lack_o      ),  // Last Burst access
-       .wbm_res_err_o         (stg_res_err_o       ),  // error
-       .wbm_res_tid_o         (stg_res_tid_o       ),
+       .wbp_res_rrdy_i        (stg_res_rrdy_i      ),  // Ready path Ready to accept the data
+       .wbp_res_rval_o        (stg_res_rval_o      ),
+       .wbp_res_dat_o         (stg_res_dat_o       ),  // data input
+       .wbp_res_ack_o         (stg_res_ack_o       ),  // acknowlegement
+       .wbp_res_lack_o        (stg_res_lack_o      ),  // Last Burst access
+       .wbp_res_err_o         (stg_res_err_o       ),  // error
+       .wbp_res_tid_o         (stg_res_tid_o       ),
 
    // Next Daisy Chain Command
        .wbd_cmd_wrdy_i        (wbd_cmd_wrdy_i      ),  // Ready path Ready to accept the data
