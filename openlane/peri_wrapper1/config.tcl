@@ -45,12 +45,6 @@ set ::env(CLOCK_BUFFER_FANOUT) "8"
 # Local sources + no2usb sources
 set ::env(VERILOG_FILES) "\
      $::env(DESIGN_DIR)/../../verilog/rtl/lib/clk_skew_adjust.gv \
-     $::env(DESIGN_DIR)/../../verilog/rtl/pwm/src/pwm_top.sv   \
-     $::env(DESIGN_DIR)/../../verilog/rtl/pwm/src/pwm_core.sv   \
-     $::env(DESIGN_DIR)/../../verilog/rtl/pwm/src/pwm_glbl_reg.sv   \
-     $::env(DESIGN_DIR)/../../verilog/rtl/pwm/src/pwm_blk_reg.sv   \
-     $::env(DESIGN_DIR)/../../verilog/rtl/pwm/src/pwm_cfg_dglitch.sv   \
-     $::env(DESIGN_DIR)/../../verilog/rtl/pwm/src/pwm.sv       \
      $::env(DESIGN_DIR)/../../verilog/rtl/timer/src/timer_top.sv \
      $::env(DESIGN_DIR)/../../verilog/rtl/timer/src/timer_reg.sv \
      $::env(DESIGN_DIR)/../../verilog/rtl/timer/src/timer.sv     \

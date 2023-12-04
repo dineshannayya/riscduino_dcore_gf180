@@ -75,7 +75,7 @@ module i2c_wrapper
     // clock skew adjust
    input logic [3:0]   cfg_cska_i2c,
    input logic	       wbd_clk_int,
-   output logic	       wbd_clk_i2c,
+   output logic	       wbd_clk_skew,
 
    input logic  [1:0]  i2c_rstn    , // async reset
    input logic         app_clk     ,
@@ -83,7 +83,7 @@ module i2c_wrapper
    // Reg Bus Slave Interface Signal
    input logic         reg_slv_cs,
    input logic         reg_slv_wr,
-   input logic [8:0]   reg_slv_addr,
+   input logic [10:0]  reg_slv_addr,
    input logic [31:0]  reg_slv_wdata,
    input logic [3:0]   reg_slv_be,
 
@@ -120,7 +120,7 @@ clk_skew_adjust u_skew_i2c
 `endif
 	       .clk_in         (wbd_clk_int                ), 
 	       .sel            (cfg_cska_i2c               ), 
-	       .clk_out        (wbd_clk_i2c                ) 
+	       .clk_out        (wbd_clk_skew               ) 
        );
 
 

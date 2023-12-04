@@ -56,11 +56,9 @@ set ::env(VERILOG_FILES) "\
      $::env(DESIGN_DIR)/../../verilog/rtl/lib/registers.v        \
      $::env(DESIGN_DIR)/../../verilog/rtl/lib/reset_sync.sv      \
      $::env(DESIGN_DIR)/../../verilog/rtl/lib/async_reg_bus.sv   \
-     $::env(DESIGN_DIR)/../../verilog/rtl/uart/src/uart_txfsm.sv \
-     $::env(DESIGN_DIR)/../../verilog/rtl/uart/src/uart_rxfsm.sv \
      $::env(DESIGN_DIR)/../../verilog/rtl/lib/double_sync_low.v  \
      $::env(DESIGN_DIR)/../../verilog/rtl/lib/clk_div8.v  \
-     $::env(DESIGN_DIR)/../../verilog/rtl/wb_interconnect/src/wb_arb.sv     \
+     $::env(DESIGN_DIR)/../../verilog/rtl/lib/wb_arb.sv     \
      "
 set ::env(VERILOG_INCLUDE_DIRS) [glob $::env(DESIGN_DIR)/../../verilog/rtl/ ]
 

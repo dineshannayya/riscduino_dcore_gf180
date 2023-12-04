@@ -63,7 +63,10 @@ module wbi_slave_node
      #(parameter AW  = 32,
        parameter BW  = 4,
        parameter BL  = 10,
-       parameter DW  = 32)
+       parameter DW  = 32,
+       parameter CDP = 4, // CMD FIFO DEPTH
+       parameter RDP = 2  // RESPONSE FIFO DEPTH
+       )
        (
 
     // Master Port
@@ -126,17 +129,17 @@ logic [RFW-1:0] m_resp_rd_data     ;
 
 // Master Write Interface
 
-assign wbm_wrdy_o = (m_cmd_wr_en) ? !m_cmd_wr_afull: !m_cmd_wr_full;
+assign wbm_cmd_wrdy_o = !m_cmd_wr_full;
 
 // avoid back to back strobe
-assign m_cmd_wr_en   = wbm_cmd_wrdy_o & wbm_cmd_val_i;
+assign m_cmd_wr_en   = wbm_cmd_val_i & !m_cmd_wr_full;
 assign m_cmd_wr_data = {wbm_cmd_adr_i,wbm_cmd_we_i,wbm_cmd_dat_i,wbm_cmd_sel_i,wbm_cmd_tid_i,wbm_cmd_bl_i};
 
 
 // Avoid back to back ack
-assign wbm_res_rval_o = m_resp_rd_en ? !m_resp_rd_aempty : !m_resp_rd_empty;
+assign wbm_res_rval_o = !m_resp_rd_empty;
 
-assign m_resp_rd_en = wbm_res_rrdy_i && wbm_res_rval_o;
+assign m_resp_rd_en = wbm_res_rrdy_i && !m_resp_rd_empty;
 assign wbm_res_ack_o    = m_resp_rd_en;
 assign wbm_res_tid_o    = m_resp_rd_data[3:0];
 assign wbm_res_dat_o    = m_resp_rd_data[DW-1+4:4];
@@ -181,7 +184,7 @@ assign s_cmd_rd_en = (wbs_stb_o && wbs_we_o) ? wbs_ack_i: wbs_lack_i;
 assign s_resp_wr_en   = wbs_stb_o & !wbs_we_o && wbs_ack_i ;
 assign s_resp_wr_data = {wbs_err_i,wbs_lack_i,wbs_dat_i,wbs_tid_o};
 
-sync_fifo2 #(.W(CFW), .DP(4),.WR_FAST(1), .RD_FAST(1)) u_cmd_if (
+sync_fifo2 #(.W(CFW), .DP(CDP),.WR_FAST(1), .RD_FAST(1)) u_cmd_if (
 	           // Sync w.r.t WR clock
 	               .clk           (clk_i             ),
                    .reset_n       (rst_n             ),
@@ -201,7 +204,7 @@ sync_fifo2 #(.W(CFW), .DP(4),.WR_FAST(1), .RD_FAST(1)) u_cmd_if (
 // Response used only for read path, 
 // As cache access will be busrt of 512 location, To 
 // support continous ack, depth is increase to 8 location
-sync_fifo2 #(.W(RFW), .DP(4), .WR_FAST(1), .RD_FAST(1)) u_resp_if (
+sync_fifo2 #(.W(RFW), .DP(RDP), .WR_FAST(1), .RD_FAST(1)) u_resp_if (
 	           // Sync w.r.t WR clock
 	           .clk           (clk_i              ),
                    .reset_n       (rst_n              ),

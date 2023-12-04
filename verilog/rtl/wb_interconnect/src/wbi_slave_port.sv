@@ -64,6 +64,8 @@ module wbi_slave_port
        parameter BW  = 4,
        parameter BL  = 10,
        parameter DW  = 32,
+       parameter CDP = 4, // CMD FIFO DEPTH
+       parameter RDP = 2,  // RESPONSE FIFO DEPTH
        parameter ADDR_MATCH_VALID1    = 1'b1,
        parameter ADDR_MATCH_MASK1     = 32'hFFFF_FFFF,
        parameter ADDR_MATCH_PATTERN1  = 32'hFFFF_FFFF,
@@ -197,7 +199,7 @@ assign wbp_res_tid_o  = (wbi_grnt == 1'b0) ?  slv_res_tid_o  : stg_res_tid_o  ;
 
 // Stagging FF to break write and read timing path
 // Assumption, CMD and Response are independent path
-wbi_slave_node u_node(
+wbi_slave_node #(.CDP(CDP), .RDP(RDP)) u_node(
          .clk_i                (mclk                ), 
          .rst_n                (reset_n             ),
          // WishBone Input master I/P
@@ -231,7 +233,7 @@ wbi_slave_node u_node(
          .wbs_we_o             (wbs_we_o            ),
          .wbs_cyc_o            (wbs_cyc_o           ),
          .wbs_stb_o            (wbs_stb_o           ),
-         .wbs_tid_o            (                    )
+         .wbs_tid_o            (wbs_tid_o           )
 
 );
 

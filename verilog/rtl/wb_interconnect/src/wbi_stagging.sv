@@ -168,7 +168,7 @@ begin
       wbp_res_err_o    <= wbd_res_err_i;    
       wbp_res_tid_o    <= wbd_res_tid_i;    
       wbp_res_hold     <= 1'b1;    
-   end else if (wbd_cmd_wrdy_i && wbd_cmd_wval_o) begin
+   end else if (wbp_res_rrdy_i && wbp_res_rval_o) begin
       wbp_res_hold     <= 1'b0;    
    end                             
 end                                

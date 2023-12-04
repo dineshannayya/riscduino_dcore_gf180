@@ -192,7 +192,7 @@ module ctech_clk_gate (
 `ifndef SYNTHESIS
    logic clk_enb;
 
-   assign #1 GCLK  = CLK & clk_enb;
+   assign GCLK  = CLK & clk_enb;
    
    always_latch begin
        if(CLK == 0) begin

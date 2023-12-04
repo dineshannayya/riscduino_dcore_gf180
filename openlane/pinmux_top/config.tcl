@@ -73,7 +73,7 @@ set ::env(SDC_FILE) $::env(DESIGN_DIR)/base.sdc
 set ::env(BASE_SDC_FILE) $::env(DESIGN_DIR)/base.sdc
 
 set ::env(LEC_ENABLE) 0
-set ::env(SYNTH_ENB_CG) 1
+#set ::env(SYNTH_ENB_CG) 1
 
 set ::env(VDD_PIN) [list {vccd1}]
 set ::env(GND_PIN) [list {vssd1}]
@@ -85,7 +85,7 @@ set ::env(GND_PIN) [list {vssd1}]
 set ::env(FP_PIN_ORDER_CFG) $::env(DESIGN_DIR)/pin_order.cfg
 
 set ::env(FP_SIZING) absolute
-set ::env(DIE_AREA) "0 0 725 725"
+set ::env(DIE_AREA) "0 0 725 850"
 
 
 # If you're going to use multiple power domains, then keep this disabled.
@@ -95,9 +95,9 @@ set ::env(RUN_CVC) 0
 
 
 set ::env(PL_TIME_DRIVEN) 1
-set ::env(PL_TARGET_DENSITY) "0.40"
+set ::env(PL_TARGET_DENSITY) "0.36"
 set ::env(GRT_ALLOW_CONGESTION) {1}
-set ::env(GPL_CELL_PADDING) "4"
+set ::env(GPL_CELL_PADDING) "5"
 #set ::env(CELL_PAD) "8"
 
 

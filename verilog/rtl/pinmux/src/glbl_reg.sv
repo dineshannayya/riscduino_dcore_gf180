@@ -71,7 +71,7 @@ module glbl_reg (
                        output logic            sspim_rst_n            ,
                        output logic            sspis_rst_n            ,
                        output logic  [2:0]     uart_rst_n             ,
-                       output logic            i2cm_rst_n             ,
+                       output logic  [1:0]     i2cm_rst_n             ,
                        output logic            usbh_rst_n              ,
                        output logic            usbd_rst_n              ,
 
@@ -276,7 +276,7 @@ ctech_buf u_buf_cpu_intf_rst  (.A(cfg_rst_ctrl[0]),.X(cpu_intf_rst_n));
 ctech_buf u_buf_qspim_rst     (.A(cfg_rst_ctrl[1]),.X(qspim_rst_n));
 ctech_buf u_buf_sspim_rst     (.A(cfg_rst_ctrl[2]),.X(sspim_rst_n));
 ctech_buf u_buf_uart0_rst     (.A(cfg_rst_ctrl[3]),.X(uart_rst_n[0]));
-ctech_buf u_buf_i2cm_rst      (.A(cfg_rst_ctrl[4]),.X(i2cm_rst_n));
+ctech_buf u_buf_i2c0_rst      (.A(cfg_rst_ctrl[4]),.X(i2cm_rst_n[0]));
 ctech_buf u_buf_usbh_rst      (.A(cfg_rst_ctrl[5]),.X(usbh_rst_n));
 ctech_buf u_buf_uart1_rst     (.A(cfg_rst_ctrl[6]),.X(uart_rst_n[1]));
 ctech_buf u_buf_usbd_rst      (.A(cfg_rst_ctrl[7]),.X(usbd_rst_n));
@@ -288,6 +288,7 @@ ctech_buf u_buf_cpu3_rst      (.A(cfg_rst_ctrl[11]),.X(cpu_core_rst_n[3]));
 
 ctech_buf u_buf_sspis_rst     (.A(cfg_rst_ctrl[12]),.X(sspis_rst_n));
 ctech_buf u_buf_uart2_rst     (.A(cfg_rst_ctrl[13]),.X(uart_rst_n[2]));
+ctech_buf u_buf_i2c1_rst     (.A(cfg_rst_ctrl[13]),.X(i2cm_rst_n[1]));
 
 
 //---------------------------------------------------------

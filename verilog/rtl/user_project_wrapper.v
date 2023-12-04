@@ -106,6 +106,7 @@ wire     wbd_wi_clk_skew;
 wire     wbd_usb_clk_skew;
 wire     wbd_i2c_clk_skew;
 wire     wbd_sspi_clk_skew;
+wire     wbd_pinmux_clk_skew;
 
 
 //---------------------------------------------------------------------
@@ -159,7 +160,7 @@ wire [31:0]                    qspi_debug                             ;
 //---------------------------------------------------------------------
 wire                           uart_mclk                              ;
 wire                           wbs_uart_stb_o                         ; // strobe/request
-wire   [8:0]                   wbs_uart_adr_o                         ; // address
+wire   [10:0]                  wbs_uart_adr_o                         ; // address
 wire                           wbs_uart_we_o                          ; // write
 wire   [31:0]                  wbs_uart_dat_o                         ; // data output
 wire   [3:0]                   wbs_uart_sel_o                         ; // byte enable
@@ -192,7 +193,7 @@ wire       [2:0]               uart_rxd                               ;
 //---------------------------------------------------------------------
 wire                           usb_mclk                              ;
 wire                           wbs_usb_stb_o                         ; // strobe/request
-wire   [8:0]                   wbs_usb_adr_o                         ; // address
+wire   [10:0]                  wbs_usb_adr_o                         ; // address
 wire                           wbs_usb_we_o                          ; // write
 wire   [31:0]                  wbs_usb_dat_o                         ; // data output
 wire   [3:0]                   wbs_usb_sel_o                         ; // byte enable
@@ -237,7 +238,7 @@ wire                           spim_mosi                              ;
 //---------------------------------------------------------------------
 wire                           sspi_mclk                             ;
 wire                           wbs_sspi_stb_o                        ; // strobe/request
-wire   [8:0]                   wbs_sspi_adr_o                        ; // address
+wire   [10:0]                  wbs_sspi_adr_o                        ; // address
 wire                           wbs_sspi_we_o                         ; // write
 wire   [31:0]                  wbs_sspi_dat_o                        ; // data output
 wire   [3:0]                   wbs_sspi_sel_o                        ; // byte enable
@@ -260,7 +261,7 @@ wire                    [3:0]  sspim_ssn                             ;
 //    I2C Slave I/F
 //---------------------------------------------------------------------
 wire                           wbs_i2c_stb_o                         ; // strobe/request
-wire   [8:0]                   wbs_i2c_adr_o                         ; // address
+wire   [10:0]                  wbs_i2c_adr_o                         ; // address
 wire                           wbs_i2c_we_o                          ; // write
 wire   [31:0]                  wbs_i2c_dat_o                         ; // data output
 wire   [3:0]                   wbs_i2c_sel_o                         ; // byte enable
@@ -304,7 +305,7 @@ wire                           cpu_intf_rst_n                         ;
 wire                           qspim_rst_n                            ;
 wire [1:0]                     sspi_rst_n                             ;
 wire [2:0]                     uart_rst_n                             ;
-wire                           i2c_rst_n                              ;
+wire [1:0]                     i2c_rst_n                              ;
 wire [1:0]                     usb_rst_n                              ;
 wire [31:0]                    irq_lines                              ;
 wire [15:0]                    cfg_riscv_ctrl                         ;
@@ -328,10 +329,8 @@ wire                           pulse_1us                              ; // 1 Mic
 
 
 //---------------------------------------------------------------------
-assign io_out[37:0] = {cfg_clk_skew_ctrl1[13:8], cfg_clk_skew_ctrl2[31:0]};
-assign io_oeb[35:0] = {wbd_wh_adr_i[31:0],wbd_wh_sel_i[3:0]};
 
-assign la_data_out = qspi_debug[31:0],{pinmux_debug[31:0]};
+assign la_data_out = {qspi_debug[31:0],pinmux_debug[31:0]};
 
 
 ////////////////////////////////////////////////////////
@@ -457,7 +456,7 @@ wbi_top   u_intercon (
           .rst_n              (wbd_int_rst_n             ),
 
          // Master 0 Interface - wbhost
-          .m0_mclk            (wbhost_mclk               )
+          .m0_mclk            (wbhost_mclk               ),
           .m0_wbd_dat_i       (wbm_wbhost_dat_i          ),
           .m0_wbd_adr_i       (wbm_wbhost_adr_i          ),
           .m0_wbd_sel_i       (wbm_wbhost_sel_i          ),
@@ -532,16 +531,16 @@ wbi_top   u_intercon (
           .m2_wbd_err_o       (wbm_sspi_err_o            ),
 
         // Slave 3 Interface - sspi
-        //.s2_wbd_err_i       (1'b0                      ), - Moved inside IP
-          .s2_mclk            (sspi_mclk                 ),
-          .s2_wbd_dat_i       (wbs_sspi_dat_i            ),
-          .s2_wbd_ack_i       (wbs_sspi_ack_i            ),
-          .s2_wbd_dat_o       (wbs_sspi_dat_o            ),
-          .s2_wbd_adr_o       (wbs_sspi_adr_o            ),
-          .s2_wbd_sel_o       (wbs_sspi_sel_o            ),
-          .s2_wbd_we_o        (wbs_sspi_we_o             ),  
-          .s2_wbd_cyc_o       (wbs_sspi_cyc_o            ),
-          .s2_wbd_stb_o       (wbs_sspi_stb_o            ),
+        //.s3_wbd_err_i       (1'b0                      ), - Moved inside IP
+          .s3_mclk            (sspi_mclk                 ),
+          .s3_wbd_dat_i       (wbs_sspi_dat_i            ),
+          .s3_wbd_ack_i       (wbs_sspi_ack_i            ),
+          .s3_wbd_dat_o       (wbs_sspi_dat_o            ),
+          .s3_wbd_adr_o       (wbs_sspi_adr_o            ),
+          .s3_wbd_sel_o       (wbs_sspi_sel_o            ),
+          .s3_wbd_we_o        (wbs_sspi_we_o             ),  
+          .s3_wbd_cyc_o       (wbs_sspi_cyc_o            ),
+          .s3_wbd_stb_o       (wbs_sspi_stb_o            ),
 
         // Slave 4 Interface - i2c
         //.s4_wbd_err_i       (1'b0                     ), - Moved inside IP
@@ -655,7 +654,7 @@ uart_wrapper   u_uart_wrapper (
         // Reg Bus Interface Signal
           .reg_cs             (wbs_uart_stb_o               ),
           .reg_wr             (wbs_uart_we_o                ),
-          .reg_addr           (wbs_uart_adr_o[8:0]          ),
+          .reg_addr           (wbs_uart_adr_o               ),
           .reg_wdata          (wbs_uart_dat_o               ),
           .reg_be             (wbs_uart_sel_o               ),
 
@@ -698,15 +697,15 @@ usb_wrapper u_usb_wrap (
           .wbd_clk_int        (usb_mclk                     ),
           .wbd_clk_skew       (wbd_usb_clk_skew             ),
 
-          .usbh_rstn          (usbh_rst_n                   ), // async reset
-          .usbd_rstn          (usbd_rst_n                   ), // async reset
+          .usbh_rstn          (usb_rst_n[0]                 ), // async reset
+          .usbd_rstn          (usb_rst_n[1]                 ), // async reset
           .app_clk            (wbd_usb_clk_skew             ),
           .usb_clk            (usb_clk                      ), // 48Mhz usb clock
 
    // Reg Bus Interface Signal
           .reg_cs             (wbs_usb_stb_o               ),
           .reg_wr             (wbs_usb_we_o                ),
-          .reg_addr           (wbs_usb_adr_o[8:0]          ),
+          .reg_addr           (wbs_usb_adr_o               ),
           .reg_wdata          (wbs_usb_dat_o               ),
           .reg_be             (wbs_usb_sel_o               ),
 
@@ -731,7 +730,7 @@ usb_wrapper u_usb_wrap (
           .usbd_out_dp        (usbd_dp_o                   ),
           .usbd_out_dn        (usbd_dn_o                   ),
           .usbd_out_tx_oen    (usbd_oen                    ),
-          .                    
+                              
           .usbd_intr_o        (usbd_intr_o                 )
 
 
@@ -750,7 +749,7 @@ sspi_wrapper  u_sspi_wrap
           .reset_n            (wbd_int_rst_n                ), // global reset
 
     // clock skew adjust
-          .cfg_cska_usb       (cfg_wcska_sspi               ),
+          .cfg_cska_sspi       (cfg_wcska_sspi               ),
           .wbd_clk_int        (sspi_mclk                    ),
           .wbd_clk_skew       (wbd_sspi_clk_skew            ),
 
@@ -760,7 +759,7 @@ sspi_wrapper  u_sspi_wrap
    // Reg Bus Interface Signal
           .reg_slv_cs         (wbs_sspi_stb_o               ),
           .reg_slv_wr         (wbs_sspi_we_o                ),
-          .reg_slv_addr       (wbs_sspi_adr_o[8:0]          ),
+          .reg_slv_addr       (wbs_sspi_adr_o               ),
           .reg_slv_wdata      (wbs_sspi_dat_o               ),
           .reg_slv_be         (wbs_sspi_sel_o               ),
 
@@ -777,21 +776,20 @@ sspi_wrapper  u_sspi_wrap
 
 
    // Wb Master I/F
-          .wbm_sspis_cyc_o    (wbm_sspis_cyc_i              ),
-          .wbm_sspis_stb_o    (wbm_sspis_stb_i              ),
-          .wbm_sspis_adr_o    (wbm_sspis_adr_i              ),
-          .wbm_sspis_we_o     (wbm_sspis_we_i               ),
-          .wbm_sspis_dat_o    (wbm_sspis_dat_i              ),
-          .wbm_sspis_sel_o    (wbm_sspis_sel_i              ),
-          .wbm_sspis_dat_i    (wbm_sspis_dat_o              ),
-          .wbm_sspis_ack_i    (wbm_sspis_ack_o              ),
-          .wbm_sspis_err_i    (wbm_sspis_err_o              ),
+          .wbm_sspis_cyc_o    (wbm_sspi_cyc_i               ),
+          .wbm_sspis_stb_o    (wbm_sspi_stb_i               ),
+          .wbm_sspis_adr_o    (wbm_sspi_adr_i               ),
+          .wbm_sspis_we_o     (wbm_sspi_we_i                ),
+          .wbm_sspis_dat_o    (wbm_sspi_dat_i               ),
+          .wbm_sspis_sel_o    (wbm_sspi_sel_i               ),
+          .wbm_sspis_dat_i    (wbm_sspi_dat_o               ),
+          .wbm_sspis_ack_i    (wbm_sspi_ack_o               ),
+          .wbm_sspis_err_i    (wbm_sspi_err_o               ),
 
-          .sclk               (sspis_sck                    ),
-          .ssn                (sspis_ssn                    ),
-          .sdin               (sspis_si                     ),
-          .sdout              (sspis_so                     ),
-          .sdout_oen          (                             )
+          .sspis_sck          (sspis_sck                    ),
+          .sspis_ssn          (sspis_ssn                    ),
+          .sspis_si           (sspis_si                     ),
+          .sspis_so           (sspis_so                     )
 
      );
 
@@ -813,7 +811,7 @@ i2c_wrapper  u_i2c_wrap (
    // Reg Bus Interface Signal
           .reg_slv_cs         (wbs_i2c_stb_o               ),
           .reg_slv_wr         (wbs_i2c_we_o                ),
-          .reg_slv_addr       (wbs_i2c_adr_o[8:0]          ),
+          .reg_slv_addr       (wbs_i2c_adr_o               ),
           .reg_slv_wdata      (wbs_i2c_dat_o               ),
           .reg_slv_be         (wbs_i2c_sel_o               ),
 
@@ -848,11 +846,11 @@ pinmux_top u_pinmux(
         // clock skew adjust
           .cfg_cska_pinmux    (cfg_wcska_pinmux             ),
           .wbd_clk_int        (pinmux_mclk                  ),
-          .wbd_clk_pinmux     (wbd_clk_pinmux               ),
+          .wbd_clk_skew       (wbd_pinmux_clk_skew           ),
 
           // System Signals
           // Inputs
-          .mclk               (wbd_clk_pinmux_skew          ),
+          .mclk               (wbd_pinmux_clk_skew          ),
           .e_reset_n          (e_reset_n                    ),
           .p_reset_n          (p_reset_n                    ),
           .s_reset_n          (wbd_int_rst_n                ),
@@ -876,22 +874,21 @@ pinmux_top u_pinmux(
           .qspim_rst_n        (qspim_rst_n                  ),
           .sspi_rst_n         (sspi_rst_n                   ),
           .uart_rst_n         (uart_rst_n                   ),
-          .i2cm_rst_n         (i2c_rst_n                    ),
-          .usbh_rst_n         (usbh_rst_n                   ),
-          .usbd_rst_n         (usbd_rst_n                   ),
+          .i2c_rst_n          (i2c_rst_n                    ),
+          .usb_rst_n          (usb_rst_n                    ),
 
           .cfg_riscv_ctrl     (cfg_riscv_ctrl               ),
 
         // Reg Bus Interface Signal
-          .reg_cs             (wbd_pinmux_stb_o             ),
-          .reg_wr             (wbd_pinmux_we_o              ),
-          .reg_addr           (wbd_pinmux_adr_o             ),
-          .reg_wdata          (wbd_pinmux_dat_o             ),
-          .reg_be             (wbd_pinmux_sel_o             ),
+          .reg_cs             (wbs_pinmux_stb_o             ),
+          .reg_wr             (wbs_pinmux_we_o              ),
+          .reg_addr           (wbs_pinmux_adr_o             ),
+          .reg_wdata          (wbs_pinmux_dat_o             ),
+          .reg_be             (wbs_pinmux_sel_o             ),
 
        // Outputs
-          .reg_rdata          (wbd_pinmux_dat_i             ),
-          .reg_ack            (wbd_pinmux_ack_i             ),
+          .reg_rdata          (wbs_pinmux_dat_i             ),
+          .reg_ack            (wbs_pinmux_ack_i             ),
 
 		   // Risc configuration
           .irq_lines          (irq_lines                    ),
@@ -1005,7 +1002,7 @@ peri_wrapper1 u_per_wrap1(
 
        // Outputs
           .reg_rdata          (wbs_peri1_dat_i             ),
-          .reg_ack            (wbs_peri1_ack_i             ),
+          .reg_ack            (wbs_peri1_ack_i             )
                
    ); 
 

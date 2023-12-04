@@ -86,7 +86,7 @@ module pinmux_top (
                         // clock skew adjust
                        input logic [3:0]       cfg_cska_pinmux,
                        input logic	           wbd_clk_int,
-                       output logic	           wbd_clk_pinmux,
+                       output logic	           wbd_clk_skew,
                        // System Signals
                        // Inputs
 		               input logic             mclk,
@@ -123,7 +123,7 @@ module pinmux_top (
                        output logic            qspim_rst_n      ,
                        output logic [1:0]      sspi_rst_n      ,
                        output logic [2:0]      uart_rst_n       ,
-                       output logic            i2cm_rst_n       ,
+                       output logic [1:0]      i2c_rst_n        ,
                        output logic [1:0]      usb_rst_n        ,
 
 		               output logic [15:0]     cfg_riscv_ctrl,
@@ -311,7 +311,7 @@ clk_skew_adjust u_skew_pinmux
 `endif
 	       .clk_in     (wbd_clk_int                 ), 
 	       .sel        (cfg_cska_pinmux             ), 
-	       .clk_out    (wbd_clk_pinmux              ) 
+	       .clk_out    (wbd_clk_skew                ) 
        );
 
 reset_sync  u_rst_sync (
@@ -360,7 +360,7 @@ glbl_reg u_glbl_reg(
           .sspim_rst_n                  (sspi_rst_n[0]           ),
           .sspis_rst_n                  (sspi_rst_n[1]           ),
           .uart_rst_n                   (uart_rst_n              ),
-          .i2cm_rst_n                   (i2cm_rst_n              ),
+          .i2cm_rst_n                   (i2c_rst_n               ),
           .usbh_rst_n                   (usb_rst_n[0]            ),
           .usbd_rst_n                   (usb_rst_n[1]            ),
 

@@ -75,7 +75,7 @@ module sspi_wrapper
     // clock skew adjust
    input logic [3:0]   cfg_cska_sspi,
    input logic	       wbd_clk_int,
-   output logic	       wbd_clk_sspi,
+   output logic	       wbd_clk_skew,
 
    input logic  [1:0]  sspi_rstn   , // async reset
    input logic         app_clk     ,
@@ -83,7 +83,7 @@ module sspi_wrapper
    // Reg Bus Slave Interface Signal
    input logic         reg_slv_cs,
    input logic         reg_slv_wr,
-   input logic [8:0]   reg_slv_addr,
+   input logic [10:0]   reg_slv_addr,
    input logic [31:0]  reg_slv_wdata,
    input logic [3:0]   reg_slv_be,
 

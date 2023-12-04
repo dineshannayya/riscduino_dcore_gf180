@@ -63,7 +63,9 @@ module wbi_master_port
      #(parameter AW  = 32,
        parameter BW  = 4,
        parameter BL  = 10,
-       parameter DW  = 32
+       parameter DW  = 32,
+       parameter CDP = 4,
+       parameter RDP = 2
        )
        (
        input   logic               reset_n         ,  // Regular Reset signal
@@ -212,7 +214,7 @@ assign stg_res_rrdy_i    = (wbm_port_match) ? wbm_res_rrdy_o : wbp_res_rrdy_i;
 //--------------------------------------------
 
 
-wbi_master_node u_master (
+wbi_master_node #(.CDP(CDP),.RDP(RDP)) u_master (
        .reset_n           (reset_n              ),  // Regular Reset signal
        .mclk              (mclk                 ),  // System clock
 

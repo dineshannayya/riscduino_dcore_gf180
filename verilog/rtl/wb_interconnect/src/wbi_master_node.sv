@@ -75,7 +75,10 @@ module wbi_master_node
      #(parameter AW  = 32,
        parameter BW  = 4,
        parameter BL  = 10,
-       parameter DW  = 32)
+       parameter DW  = 32,
+       parameter CDP = 4,
+       parameter RDP = 2
+       )
        (
 
     // Master Port
@@ -256,7 +259,7 @@ assign s_resp_wr_data = {wbm_res_err_i,wbm_res_lack_i,wbm_res_dat_i};
 
 //---------------------------------------------------
 
-sync_fifo2 #(.W(CFW), .DP(4),.WR_FAST(1), .RD_FAST(1)) u_cmd_if (
+sync_fifo2 #(.W(CFW), .DP(CDP),.WR_FAST(1), .RD_FAST(1)) u_cmd_if (
 	           // Sync w.r.t WR clock
 	               .clk           (mclk             ),
                    .reset_n       (reset_n           ),
@@ -276,7 +279,7 @@ sync_fifo2 #(.W(CFW), .DP(4),.WR_FAST(1), .RD_FAST(1)) u_cmd_if (
 // Response used only for read path, 
 // As cache access will be busrt of 512 location, To 
 // support continous ack, depth is increase to 8 location
-sync_fifo2 #(.W(RFW), .DP(4), .WR_FAST(1), .RD_FAST(1)) u_resp_if (
+sync_fifo2 #(.W(RFW), .DP(RDP), .WR_FAST(1), .RD_FAST(1)) u_resp_if (
 	           // Sync w.r.t WR clock
 	               .clk           (mclk              ),
                    .reset_n       (reset_n            ),

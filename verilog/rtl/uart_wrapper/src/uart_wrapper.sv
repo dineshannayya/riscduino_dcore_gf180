@@ -85,7 +85,7 @@ module uart_wrapper
         // Reg Bus Interface Signal
    input logic         reg_cs,
    input logic         reg_wr,
-   input logic [8:0]   reg_addr,
+   input logic [10:0]  reg_addr,
    input logic [31:0]  reg_wdata,
    input logic [3:0]   reg_be,
 
