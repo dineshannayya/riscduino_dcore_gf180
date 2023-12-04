@@ -1,0 +1,4 @@
+#! /bin/csh -f
+iverilog -D RDW=16 -f filelist_rtl.f -o tb_top.vvp  & vvp tb_top.vvp | tee run.RDW.16.log  
+iverilog -D RDW=32 -f filelist_rtl.f -o tb_top.vvp  & vvp tb_top.vvp | tee run.RDW.32.log
+iverilog -D RDW=64 -f filelist_rtl.f -o tb_top.vvp  & vvp tb_top.vvp | tee run.RDW.64.log

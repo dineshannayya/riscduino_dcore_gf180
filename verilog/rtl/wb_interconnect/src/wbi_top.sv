@@ -118,7 +118,19 @@ module wbi_top
          output	logic 	        s0_wbd_cyc_o,
          output	logic 	        s0_wbd_stb_o,
          
-         // Slave 1 Interface
+         // Master 1 Interface - uart
+         input   logic	[31:0]	m1_wbd_dat_i,
+         input   logic  [31:0]	m1_wbd_adr_i,
+         input   logic  [3:0]	m1_wbd_sel_i,
+         input   logic  	    m1_wbd_we_i,
+         input   logic  	    m1_wbd_cyc_i,
+         input   logic  	    m1_wbd_stb_i,
+         output  logic	[31:0]	m1_wbd_dat_o,
+         output  logic		    m1_wbd_ack_o,
+         output  logic		    m1_wbd_lack_o,
+         output  logic		    m1_wbd_err_o,
+
+         // Slave 1 Interface - uart
          output logic           s1_mclk,
          input	logic [31:0]	s1_wbd_dat_i,
          input	logic 	        s1_wbd_ack_i,
@@ -130,7 +142,7 @@ module wbi_top
          output	logic 	        s1_wbd_cyc_o,
          output	logic 	        s1_wbd_stb_o,
          
-         // Slave 2 Interface
+         // Slave 2 Interface - usb
          output logic           s2_mclk,
          input	logic [31:0]	s2_wbd_dat_i,
          input	logic 	        s2_wbd_ack_i,
@@ -140,8 +152,67 @@ module wbi_top
          output	logic [3:0]	    s2_wbd_sel_o,
          output	logic 	        s2_wbd_we_o,
          output	logic 	        s2_wbd_cyc_o,
-         output	logic 	        s2_wbd_stb_o
+         output	logic 	        s2_wbd_stb_o,
 
+         // Master 2 Interface - sspi
+         input   logic	[31:0]	m2_wbd_dat_i,
+         input   logic  [31:0]	m2_wbd_adr_i,
+         input   logic  [3:0]	m2_wbd_sel_i,
+         input   logic  	    m2_wbd_we_i,
+         input   logic  	    m2_wbd_cyc_i,
+         input   logic  	    m2_wbd_stb_i,
+         output  logic	[31:0]	m2_wbd_dat_o,
+         output  logic		    m2_wbd_ack_o,
+         output  logic		    m2_wbd_lack_o,
+         output  logic		    m2_wbd_err_o,
+
+         // Slave 3 Interface - sspi
+         output logic           s3_mclk,
+         input	logic [31:0]	s3_wbd_dat_i,
+         input	logic 	        s3_wbd_ack_i,
+      // input	logic 	        s3_wbd_err_i, - unused
+         output	logic [31:0]	s3_wbd_dat_o,
+         output	logic [10:0]	s3_wbd_adr_o, // glbl reg need only 9 bits
+         output	logic [3:0]	    s3_wbd_sel_o,
+         output	logic 	        s3_wbd_we_o,
+         output	logic 	        s3_wbd_cyc_o,
+         output	logic 	        s3_wbd_stb_o,
+
+         // Slave 4 Interface - i2c
+         output logic           s4_mclk,
+         input	logic [31:0]	s4_wbd_dat_i,
+         input	logic 	        s4_wbd_ack_i,
+      // input	logic 	        s4_wbd_err_i, - unused
+         output	logic [31:0]	s4_wbd_dat_o,
+         output	logic [10:0]	s4_wbd_adr_o, // glbl reg need only 9 bits
+         output	logic [3:0]	    s4_wbd_sel_o,
+         output	logic 	        s4_wbd_we_o,
+         output	logic 	        s4_wbd_cyc_o,
+         output	logic 	        s4_wbd_stb_o,
+
+         // Slave 5 Interface - pinmux
+         output logic           s5_mclk,
+         input	logic [31:0]	s5_wbd_dat_i,
+         input	logic 	        s5_wbd_ack_i,
+      // input	logic 	        s5_wbd_err_i, - unused
+         output	logic [31:0]	s5_wbd_dat_o,
+         output	logic [10:0]	s5_wbd_adr_o, // glbl reg need only 9 bits
+         output	logic [3:0]	    s5_wbd_sel_o,
+         output	logic 	        s5_wbd_we_o,
+         output	logic 	        s5_wbd_cyc_o,
+         output	logic 	        s5_wbd_stb_o,
+
+         // Slave 6 Interface - peri
+         output logic           s6_mclk,
+         input	logic [31:0]	s6_wbd_dat_i,
+         input	logic 	        s6_wbd_ack_i,
+      // input	logic 	        s6_wbd_err_i, - unused
+         output	logic [31:0]	s6_wbd_dat_o,
+         output	logic [10:0]	s6_wbd_adr_o, // glbl reg need only 9 bits
+         output	logic [3:0]	    s6_wbd_sel_o,
+         output	logic 	        s6_wbd_we_o,
+         output	logic 	        s6_wbd_cyc_o,
+         output	logic 	        s6_wbd_stb_o
 	);
 
 ////////////////////////////////////////////////////////////////////
@@ -234,6 +305,22 @@ type_wb_res_data_intf s0d_res_data;
 type_wb_cmd_ctrl_intf s0d_cmd_ctrl;
 type_wb_res_ctrl_intf s0d_res_ctrl;
 
+// M1
+type_wb_wr_intf m1_wb_wr;
+type_wb_rd_intf m1_wb_rd;
+
+type_wb_cmd_data_intf m1p_cmd_data;
+type_wb_res_data_intf m1p_res_data;
+
+type_wb_cmd_ctrl_intf m1p_cmd_ctrl;
+type_wb_res_ctrl_intf m1p_res_ctrl;
+
+type_wb_cmd_data_intf m1d_cmd_data;
+type_wb_res_data_intf m1d_res_data;
+
+type_wb_cmd_ctrl_intf m1d_cmd_ctrl;
+type_wb_res_ctrl_intf m1d_res_ctrl;
+
 // S1
 type_wb_wr_intf s1_wb_wr;
 type_wb_rd_intf s1_wb_rd;
@@ -266,6 +353,101 @@ type_wb_res_data_intf s2d_res_data;
 type_wb_cmd_ctrl_intf s2d_cmd_ctrl;
 type_wb_res_ctrl_intf s2d_res_ctrl;
 
+// M2
+type_wb_wr_intf m2_wb_wr;
+type_wb_rd_intf m2_wb_rd;
+
+type_wb_cmd_data_intf m2p_cmd_data;
+type_wb_res_data_intf m2p_res_data;
+
+type_wb_cmd_ctrl_intf m2p_cmd_ctrl;
+type_wb_res_ctrl_intf m2p_res_ctrl;
+
+type_wb_cmd_data_intf m2d_cmd_data;
+type_wb_res_data_intf m2d_res_data;
+
+type_wb_cmd_ctrl_intf m2d_cmd_ctrl;
+type_wb_res_ctrl_intf m2d_res_ctrl;
+
+// S3
+type_wb_wr_intf s3_wb_wr;
+type_wb_rd_intf s3_wb_rd;
+
+type_wb_cmd_data_intf s3p_cmd_data;
+type_wb_res_data_intf s3p_res_data;
+
+type_wb_cmd_ctrl_intf s3p_cmd_ctrl;
+type_wb_res_ctrl_intf s3p_res_ctrl;
+
+type_wb_cmd_data_intf s3d_cmd_data;
+type_wb_res_data_intf s3d_res_data;
+
+type_wb_cmd_ctrl_intf s3d_cmd_ctrl;
+type_wb_res_ctrl_intf s3d_res_ctrl;
+
+// S4
+type_wb_wr_intf s4_wb_wr;
+type_wb_rd_intf s4_wb_rd;
+
+type_wb_cmd_data_intf s4p_cmd_data;
+type_wb_res_data_intf s4p_res_data;
+
+type_wb_cmd_ctrl_intf s4p_cmd_ctrl;
+type_wb_res_ctrl_intf s4p_res_ctrl;
+
+type_wb_cmd_data_intf s4d_cmd_data;
+type_wb_res_data_intf s4d_res_data;
+
+type_wb_cmd_ctrl_intf s4d_cmd_ctrl;
+type_wb_res_ctrl_intf s4d_res_ctrl;
+
+// S4
+type_wb_wr_intf s4_wb_wr;
+type_wb_rd_intf s4_wb_rd;
+
+type_wb_cmd_data_intf s4p_cmd_data;
+type_wb_res_data_intf s4p_res_data;
+
+type_wb_cmd_ctrl_intf s4p_cmd_ctrl;
+type_wb_res_ctrl_intf s4p_res_ctrl;
+
+type_wb_cmd_data_intf s4d_cmd_data;
+type_wb_res_data_intf s4d_res_data;
+
+type_wb_cmd_ctrl_intf s4d_cmd_ctrl;
+type_wb_res_ctrl_intf s4d_res_ctrl;
+
+// S5
+type_wb_wr_intf s5_wb_wr;
+type_wb_rd_intf s5_wb_rd;
+
+type_wb_cmd_data_intf s5p_cmd_data;
+type_wb_res_data_intf s5p_res_data;
+
+type_wb_cmd_ctrl_intf s5p_cmd_ctrl;
+type_wb_res_ctrl_intf s5p_res_ctrl;
+
+type_wb_cmd_data_intf s5d_cmd_data;
+type_wb_res_data_intf s5d_res_data;
+
+type_wb_cmd_ctrl_intf s5d_cmd_ctrl;
+type_wb_res_ctrl_intf s5d_res_ctrl;
+
+// S6
+type_wb_wr_intf s6_wb_wr;
+type_wb_rd_intf s6_wb_rd;
+
+type_wb_cmd_data_intf s6p_cmd_data;
+type_wb_res_data_intf s6p_res_data;
+
+type_wb_cmd_ctrl_intf s6p_cmd_ctrl;
+type_wb_res_ctrl_intf s6p_res_ctrl;
+
+type_wb_cmd_data_intf s6d_cmd_data;
+type_wb_res_data_intf s6d_res_data;
+
+type_wb_cmd_ctrl_intf s6d_cmd_ctrl;
+type_wb_res_ctrl_intf s6d_res_ctrl;
 
 //--------------------------------------
 
@@ -284,24 +466,27 @@ clk_skew_adjust u_skew_wi
        );
 
 
-/////////////////////////////////////////////////
+// ---------------------------------------------
 // Master-0 Mapping
 // ---------------------------------------------
-assign m0_mclk           =  mclk_raw;
+assign m0_mclk           = mclk_raw;
+assign m0_wb_wr.wbd_bl   = 'h0;
+assign m0_wb_wr.wbd_bry  = 1'b1;
+assign m0_wb_wr.wbd_tid  = M_WB_HOST;
 assign m0_wb_wr.wbd_dat  = m0_wbd_dat_i;
 assign m0_wb_wr.wbd_adr  = m0_wbd_adr_i;
 assign m0_wb_wr.wbd_sel  = m0_wbd_sel_i;
-assign m0_wb_wr.wbd_bl   = 'h0;
-assign m0_wb_wr.wbd_bry  = 1'b1;
 assign m0_wb_wr.wbd_we   = m0_wbd_we_i;
 assign m0_wb_wr.wbd_cyc  = m0_wbd_cyc_i;
 assign m0_wb_wr.wbd_stb  = m0_wbd_stb_i;
+assign m0_wb_wr.wbd_bl   = 'h0;
+assign m0_wb_wr.wbd_bry  = 1'b1;
 assign m0_wb_wr.wbd_tid  = M_WB_HOST;
 
-assign m0_wbd_dat_o  = m0_wb_rd.wbd_dat;
-assign m0_wbd_ack_o  = m0_wb_rd.wbd_ack;
-assign m0_wbd_lack_o = m0_wb_rd.wbd_lack;
-assign m0_wbd_err_o  = m0_wb_rd.wbd_err;
+assign m0_wbd_dat_o      = m0_wb_rd.wbd_dat;
+assign m0_wbd_ack_o      = m0_wb_rd.wbd_ack;
+assign m0_wbd_lack_o     = m0_wb_rd.wbd_lack;
+assign m0_wbd_err_o      = m0_wb_rd.wbd_err;
 
 
 
@@ -355,7 +540,69 @@ assign s2_wb_rd.wbd_ack  = s2_wbd_ack_i ;
 assign s2_wb_rd.wbd_lack = s2_wbd_ack_i ;
 assign s2_wb_rd.wbd_err  = 1'b0; // s2_wbd_err_i ; - unused
 
+//--------------------------------------
+// Slave-3 Port Mapping
+// -------------------------------------
+assign  s3_mclk           =  mclk_raw;
+assign  s3_wbd_dat_o      =  s3_wb_wr.wbd_dat ;
+assign  s3_wbd_adr_o      =  s3_wb_wr.wbd_adr[10:0] ; // Global Reg Need 8 bit
+assign  s3_wbd_sel_o      =  s3_wb_wr.wbd_sel ;
+assign  s3_wbd_we_o       =  s3_wb_wr.wbd_we  ;
+assign  s3_wbd_cyc_o      =  s3_wb_wr.wbd_cyc ;
+assign  s3_wbd_stb_o      =  s3_wb_wr.wbd_stb ;
 
+assign  s3_wb_rd.wbd_dat  =  s3_wbd_dat_i ;
+assign  s3_wb_rd.wbd_ack  =  s3_wbd_ack_i ;
+assign  s3_wb_rd.wbd_lack =  s3_wbd_ack_i ;
+assign  s3_wb_rd.wbd_err  =  1'b0; // s2_wbd_err_i ; - unused
+
+//--------------------------------------
+// Slave-4 Port Mapping
+// -------------------------------------
+assign  s4_mclk           =  mclk_raw;
+assign  s4_wbd_dat_o      =  s4_wb_wr.wbd_dat ;
+assign  s4_wbd_adr_o      =  s4_wb_wr.wbd_adr[10:0] ; // Global Reg Need 8 bit
+assign  s4_wbd_sel_o      =  s4_wb_wr.wbd_sel ;
+assign  s4_wbd_we_o       =  s4_wb_wr.wbd_we  ;
+assign  s4_wbd_cyc_o      =  s4_wb_wr.wbd_cyc ;
+assign  s4_wbd_stb_o      =  s4_wb_wr.wbd_stb ;
+
+assign  s4_wb_rd.wbd_dat  =  s4_wbd_dat_i ;
+assign  s4_wb_rd.wbd_ack  =  s4_wbd_ack_i ;
+assign  s4_wb_rd.wbd_lack =  s4_wbd_ack_i ;
+assign  s4_wb_rd.wbd_err  =  1'b0; // s2_wbd_err_i ; - unused
+
+//--------------------------------------
+// Slave-5 Port Mapping
+// -------------------------------------
+assign  s5_mclk           =  mclk_raw;
+assign  s5_wbd_dat_o      =  s5_wb_wr.wbd_dat ;
+assign  s5_wbd_adr_o      =  s5_wb_wr.wbd_adr[10:0] ; // Global Reg Need 8 bit
+assign  s5_wbd_sel_o      =  s5_wb_wr.wbd_sel ;
+assign  s5_wbd_we_o       =  s5_wb_wr.wbd_we  ;
+assign  s5_wbd_cyc_o      =  s5_wb_wr.wbd_cyc ;
+assign  s5_wbd_stb_o      =  s5_wb_wr.wbd_stb ;
+
+assign  s5_wb_rd.wbd_dat  =  s5_wbd_dat_i ;
+assign  s5_wb_rd.wbd_ack  =  s5_wbd_ack_i ;
+assign  s5_wb_rd.wbd_lack =  s5_wbd_ack_i ;
+assign  s5_wb_rd.wbd_err  =  1'b0; // s2_wbd_err_i ; - unused
+
+//--------------------------------------
+// Slave-6 Port Mapping
+// -------------------------------------
+assign  s6_mclk           =  mclk_raw;
+assign  s6_wbd_dat_o      =  s6_wb_wr.wbd_dat ;
+assign  s6_wbd_adr_o      =  s6_wb_wr.wbd_adr[10:0] ; // Global Reg Need 8 bit
+assign  s6_wbd_sel_o      =  s6_wb_wr.wbd_sel ;
+assign  s6_wbd_we_o       =  s6_wb_wr.wbd_we  ;
+assign  s6_wbd_cyc_o      =  s6_wb_wr.wbd_cyc ;
+assign  s6_wbd_stb_o      =  s6_wb_wr.wbd_stb ;
+
+assign  s6_wb_rd.wbd_dat  =  s6_wbd_dat_i ;
+assign  s6_wb_rd.wbd_ack  =  s6_wbd_ack_i ;
+assign  s6_wb_rd.wbd_lack =  s6_wbd_ack_i ;
+assign  s6_wb_rd.wbd_err  =  1'b0; // s2_wbd_err_i ; - unused
 //------------------------------------------
 // Command Daisy Chain
 //------------------------------------------
