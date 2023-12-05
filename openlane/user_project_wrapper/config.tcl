@@ -30,7 +30,8 @@ set ::env(FP_DEF_TEMPLATE) "$::env(DESIGN_DIR)/fixed_dont_change/user_project_wr
 
 ## Source Verilog Files
 set ::env(VERILOG_FILES) "\
-	$verilog_root/rtl/user_project_wrapper.v"
+	$verilog_root/rtl/user_project_wrapper.v \
+	$verilog_root/rtl/wb_interconnect/src/wbi_top.sv"
 
 
 ## Clock configurations
@@ -49,20 +50,47 @@ set ::env(SIGNOFF_SDC_FILE) $::env(DESIGN_DIR)/base.sdc
 
 ### Black-box verilog and views
 set ::env(VERILOG_FILES_BLACKBOX) "\
+	    $::env(DESIGN_DIR)/../../verilog/gl/sspi_wrapper.v \
+	    $::env(DESIGN_DIR)/../../verilog/gl/i2c_wrapper.v \
+	    $::env(DESIGN_DIR)/../../verilog/gl/uart_wrapper.v \
+	    $::env(DESIGN_DIR)/../../verilog/gl/qspim_top.v \
+	    $::env(DESIGN_DIR)/../../verilog/gl/usb_wrapper.v \
+	    $::env(DESIGN_DIR)/../../verilog/gl/wbi_master_port.v \
+	    $::env(DESIGN_DIR)/../../verilog/gl/wbi_slave_port.v \
+	    $::env(DESIGN_DIR)/../../verilog/gl/pinmux_top.v \
+	    $::env(DESIGN_DIR)/../../verilog/gl/peri_wrapper0.v \
 	    $::env(DESIGN_DIR)/../../verilog/gl/wb_host.v \
 	    "
 
 set ::env(EXTRA_LEFS) "\
-	$lef_root//wb_host.lef \
+	$lef_root/sspi_wrapper.lef \
+	$lef_root/i2c_wrapper.lef \
+	$lef_root/uart_wrapper.lef \
+	$lef_root/qspim_top.lef \
+	$lef_root/usb_wrapper.lef \
+	$lef_root/wbi_master_port.lef \
+	$lef_root/wbi_slave_port.lef \
+	$lef_root/pinmux_top.lef \
+	$lef_root/peri_wrapper0.lef \
+	$lef_root/wb_host.lef \
 	"
 
 set ::env(EXTRA_GDS_FILES) "\
-	$gds_root//wb_host.gds \
+	$gds_root/sspi_wrapper.gds \
+	$gds_root/i2c_wrapper.gds \
+	$gds_root/uart_wrapper.gds \
+	$gds_root/qspim_top.gds \
+	$gds_root/usb_wrapper.gds \
+	$gds_root/wbi_master_port.gds \
+	$gds_root/wbi_slave_port.gds \
+	$gds_root/pinmux_top.gds \
+	$gds_root/peri_wrapper0.gds \
+	$gds_root/wb_host.gds \
 	"
 
 set ::env(SYNTH_TOP_LEVEL) 0
 set ::env(SYNTH_READ_BLACKBOX_LIB) 1
-set ::env(SYNTH_DEFINES) [list SYNTHESIS GF180NM YCR_DBG_EN ]
+set ::env(SYNTH_DEFINES) [list SYNTHESIS GF180NM ]
 set ::env(SYNTH_USE_PG_PINS_DEFINES) "USE_POWER_PINS"
 set ::env(SYNTH_BUFFERING) "0"
 
@@ -118,7 +146,24 @@ set ::env(DRT_OPT_ITERS) {32}
 
 
 set ::env(FP_PDN_MACRO_HOOKS) " \
-	u_wb_host                   vdd vss vccd1 vssd1 \
+	u_wb_host          vdd vss vccd1 vssd1,\
+    u_intercon.u_m0    vdd vss vccd1 vssd1,\
+    u_intercon.u_s0    vdd vss vccd1 vssd1,\
+    u_qspi_master      vdd vss vccd1 vssd1,\
+    u_intercon.u_m1    vdd vss vccd1 vssd1,\
+    u_intercon.u_s1    vdd vss vccd1 vssd1,\
+    u_uart_wrapper     vdd vss vccd1 vssd1,\
+    u_intercon.u_s2    vdd vss vccd1 vssd1,\
+    u_usb_wrap         vdd vss vccd1 vssd1,\
+    u_intercon.u_m2    vdd vss vccd1 vssd1,\
+    u_intercon.u_s3    vdd vss vccd1 vssd1,\
+    u_sspi_wrap        vdd vss vccd1 vssd1,\
+    u_intercon.u_s4    vdd vss vccd1 vssd1,\
+    u_i2c_wrap         vdd vss vccd1 vssd1,\
+    u_intercon.u_s5    vdd vss vccd1 vssd1,\
+    u_pinmux           vdd vss vccd1 vssd1,\
+    u_intercon.u_s6    vdd vss vccd1 vssd1,\
+    u_per_wrap0        vdd vss vccd1 vssd1 \
       	"
 
 
