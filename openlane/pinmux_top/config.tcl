@@ -36,9 +36,9 @@ set ::env(SYNTH_MAX_FANOUT) 8
 set ::env(SYNTH_BUFFERING) {0}
 
 ## CTS BUFFER
-set ::env(CTS_CLK_MAX_WIRE_LENGTH) {250}
-set ::env(CTS_SINK_CLUSTERING_SIZE) "16"
-set ::env(CLOCK_BUFFER_FANOUT) "8"
+#set ::env(CTS_CLK_MAX_WIRE_LENGTH) {250}
+#set ::env(CTS_SINK_CLUSTERING_SIZE) "16"
+#set ::env(CLOCK_BUFFER_FANOUT) "8"
 
 # Sources
 # -------
@@ -85,7 +85,7 @@ set ::env(GND_PIN) [list {vssd1}]
 set ::env(FP_PIN_ORDER_CFG) $::env(DESIGN_DIR)/pin_order.cfg
 
 set ::env(FP_SIZING) absolute
-set ::env(DIE_AREA) "0 0 725 850"
+set ::env(DIE_AREA) "0 0 800 700"
 
 
 # If you're going to use multiple power domains, then keep this disabled.
@@ -95,9 +95,9 @@ set ::env(RUN_CVC) 0
 
 
 set ::env(PL_TIME_DRIVEN) 1
-set ::env(PL_TARGET_DENSITY) "0.36"
+set ::env(PL_TARGET_DENSITY) "0.39"
 set ::env(GRT_ALLOW_CONGESTION) {1}
-set ::env(GPL_CELL_PADDING) "5"
+set ::env(GPL_CELL_PADDING) "4"
 #set ::env(CELL_PAD) "8"
 
 
