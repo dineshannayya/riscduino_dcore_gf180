@@ -64,6 +64,7 @@
 //////////////////////////////////////////////////////////////////////
 
 
+`include "user_reg_map.v"
 `include "user_params.svh"
 
 module uart_wrapper 
@@ -90,8 +91,10 @@ module uart_wrapper
    input logic [3:0]   reg_be,
 
         // Outputs
+   output logic [3:0]  reg_sid,
    output logic [31:0] reg_rdata,
    output logic        reg_ack,
+   output logic        reg_err,
 
    // Wb Master I/F
    output  logic        wbm_uart_cyc_o       ,  // strobe/request
@@ -100,10 +103,13 @@ module uart_wrapper
    output  logic        wbm_uart_we_o        ,  // write
    output  logic [31:0] wbm_uart_dat_o       ,  // data output
    output  logic [3:0]  wbm_uart_sel_o       ,  // byte enable
+   output  logic [3:0]  wbm_uart_mid_o       ,  // master ID
+   output  logic        wbm_uart_bry_o       ,  // burst ready
+   output  logic [9:0]  wbm_uart_bl_o        ,  // burst length
+
    input   logic [31:0] wbm_uart_dat_i       ,  // data input
    input   logic        wbm_uart_ack_i       ,  // acknowlegement
    input   logic        wbm_uart_err_i       ,  // error
-
 
 
    // UART I/F
@@ -111,6 +117,16 @@ module uart_wrapper
    output logic  [2:0] uart_txd               
 
      );
+
+assign reg_sid = `WBI_SID_UART;
+assign reg_err = 1'b0;
+
+assign    wbm_uart_mid_o = `WBI_MID_UART;
+assign    wbm_uart_bry_o = 1'b1; // Always Ready
+assign    wbm_uart_bl_o =  'h1;  // Single burst
+
+
+
 
 // uart clock skew control
 clk_skew_adjust u_skew_uart

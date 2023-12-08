@@ -84,6 +84,7 @@
 ////                                                              ////
 //////////////////////////////////////////////////////////////////////
 
+`include "user_reg_map.v"
 `include "user_params.svh"
 
 module wb_host (
@@ -139,6 +140,12 @@ module wb_host (
     output  logic               wbs_we_o         ,  // write
     output  logic [31:0]        wbs_dat_o        ,  // data output
     output  logic [3:0]         wbs_sel_o        ,  // byte enable
+
+    output  logic [3:0]         wbs_mid_o        ,  // master id
+    output  logic               wbs_bry_o        ,  // burst ready
+    output  logic [9:0]         wbs_bl_o         ,  // burst length
+
+
     input   logic [31:0]        wbs_dat_i        ,  // data input
     input   logic               wbs_ack_i        ,  // acknowlegement
     input   logic               wbs_err_i        ,  // error
@@ -187,6 +194,11 @@ logic               wb_err_int            ; // error
 logic               arst_n                ;
 logic               soft_reboot           ;
 logic               clk_enb               ;
+
+
+assign    wbs_mid_o = `WBI_MID_WBHOST;
+assign    wbs_bry_o = 1'b1; // Always Ready
+assign    wbs_bl_o =  'h1;  // Single burst
 
 assign	  e_reset_n              = wbm_rst_n ;  // sync external reset
 assign    cfg_strap_pad_ctrl     = !p_reset_n;

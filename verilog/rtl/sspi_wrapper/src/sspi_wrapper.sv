@@ -63,6 +63,7 @@
 //////////////////////////////////////////////////////////////////////
 
 
+`include "user_reg_map.v"
 `include "user_params.svh"
 module sspi_wrapper 
 
@@ -88,8 +89,10 @@ module sspi_wrapper
    input logic [3:0]   reg_slv_be,
 
    // Outputs
+   output logic [3:0]  reg_slv_sid,
    output logic [31:0] reg_slv_rdata,
    output logic        reg_slv_ack,
+   output logic        reg_slv_err,
 
 
    // SPIM I/F
@@ -106,6 +109,10 @@ module sspi_wrapper
    output  logic        wbm_sspis_we_o        ,  // write
    output  logic [31:0] wbm_sspis_dat_o       ,  // data output
    output  logic [3:0]  wbm_sspis_sel_o       ,  // byte enable
+   output  logic [3:0]  wbm_sspis_mid_o       ,  // master id
+   output  logic        wbm_sspis_bry_o       ,  // burst ready
+   output  logic [9:0]  wbm_sspis_bl_o        ,  // Burst length
+
    input   logic [31:0] wbm_sspis_dat_i       ,  // data input
    input   logic        wbm_sspis_ack_i       ,  // acknowlegement
    input   logic        wbm_sspis_err_i       ,  // error
@@ -119,6 +126,14 @@ module sspi_wrapper
 
      );
 
+
+assign reg_slv_sid = `WBI_SID_SSPI;
+
+assign reg_slv_err = 1'b0;
+assign   wbm_sspis_mid_o       = `WBI_MID_SSPI;  // master id
+assign   wbm_sspis_bry_o       = 1'b1;           // burst ready
+assign   wbm_sspis_bl_o        = 'h1;            // Burst length
+
 // sspi clock skew control
 clk_skew_adjust u_skew_sspi
        (
@@ -128,7 +143,7 @@ clk_skew_adjust u_skew_sspi
 `endif
 	       .clk_in         (wbd_clk_int                ), 
 	       .sel            (cfg_cska_sspi              ), 
-	       .clk_out        (wbd_clk_sspi               ) 
+	       .clk_out        (wbd_clk_skew               ) 
        );
 
 

@@ -116,11 +116,11 @@
 
 // If all defines are commented, custom configuration will be used (see below)
 
-`define YCR_ICACHE_EN   // Enable ICACHE
-`define YCR_DCACHE_EN   // Enable ICACHE
-
-`define YCR_TCM_MEM_2KB   // Enable 2KB TCM
-`define YCR_TCM_MEM_8KB   // Enable 8KB TCM
+//`define YCR_ICACHE_EN   // Enable ICACHE
+//`define YCR_DCACHE_EN   // Enable ICACHE
+//
+//`define YCR_TCM_MEM_2KB   // Enable 2KB TCM
+//`define YCR_TCM_MEM_8KB   // Enable 8KB TCM
 
 //------------------------------------------------------------------------------
 // READ-ONLY: settings for recommended configurations
@@ -139,7 +139,7 @@
 // `define YCR_TDU_ICOUNT_EN          // enable hardware triggers on instruction counter
   `define YCR_IPIC_EN                // enable Integrated Programmable Interrupt Controller
   `define YCR_IPIC_SYNC_EN           // enable IPIC synchronizer
-  `define YCR_TCM_EN
+//  `define YCR_TCM_EN
   //`define SCR1_TCM_MEM
   `define YCR_IMEM_ROUTER_EN
   `define YCR_NEW_PC_REG             // enable register in IFU for New_PC value

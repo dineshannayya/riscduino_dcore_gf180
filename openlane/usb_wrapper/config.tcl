@@ -99,7 +99,7 @@ set ::env(GND_PIN) [list {vssd1}]
 
 set ::env(FP_PIN_ORDER_CFG) $::env(DESIGN_DIR)/pin_order.cfg
 set ::env(FP_SIZING) "absolute"
-set ::env(DIE_AREA) "0 0 600 1050"
+set ::env(DIE_AREA) "0 0 750 750"
 
 
 
@@ -110,10 +110,10 @@ set ::env(RUN_CVC) 0
 
 
 set ::env(PL_TIME_DRIVEN) 1
-set ::env(PL_TARGET_DENSITY) "0.55"
+set ::env(PL_TARGET_DENSITY) "0.60"
+set ::env(GPL_CELL_PADDING) "2"
+set ::env(GRT_ALLOW_CONGESTION) {1}
 
-# helps in anteena fix
-set ::env(USE_ARC_ANTENNA_CHECK) "0"
 
 #set ::env(FP_IO_VEXTEND) 4
 #set ::env(FP_IO_HEXTEND) 4
@@ -136,7 +136,6 @@ set ::env(DIODE_INSERTION_STRATEGY) 4
 set ::env(GLB_RESIZER_TIMING_OPTIMIZATIONS) {1}
 set ::env(PL_RESIZER_TIMING_OPTIMIZATIONS) {1}
 
-set ::env(CELL_PAD) {8}
 #LVS Issue - DEF Base looks to having issue
 set ::env(MAGIC_EXT_USE_GDS) {1}
 

@@ -20,7 +20,7 @@
 set script_dir [file dirname [file normalize [info script]]]
 # Name
 
-set ::env(DESIGN_NAME) peri_wrapper1
+set ::env(DESIGN_NAME) peri_wrapper0
 
 set ::env(DESIGN_IS_CORE) "0"
 set ::env(FP_PDN_CORE_RING) "0"
@@ -29,15 +29,7 @@ set ::env(FP_PDN_CORE_RING) "0"
 set ::env(CLOCK_PERIOD) "10"
 set ::env(CLOCK_PORT) "mclk"
 
-set ::env(SYNTH_MAX_FANOUT) 4
-set ::env(SYNTH_BUFFERING) {0}
-#set ::env(SYNTH_AUTONAME) {1}
-#set ::env(SYNTH_NO_FLAT) "1"
 
-## CTS BUFFER
-set ::env(CTS_CLK_MAX_WIRE_LENGTH) {250}
-set ::env(CTS_SINK_CLUSTERING_SIZE) "16"
-set ::env(CLOCK_BUFFER_FANOUT) "8"
 
 # Sources
 # -------
@@ -57,7 +49,7 @@ set ::env(VERILOG_FILES) "\
      $::env(DESIGN_DIR)/../../verilog/rtl/lib/ctech_cells.sv     \
      $::env(DESIGN_DIR)/../../verilog/rtl/lib/reset_sync.sv     \
      $::env(DESIGN_DIR)/../../verilog/rtl/lib/sync_fifo.sv     \
-     $::env(DESIGN_DIR)/../../verilog/rtl/peri_wrapper1/src/peri_wrapper1.sv     \
+     $::env(DESIGN_DIR)/../../verilog/rtl/peri_wrapper0/src/peri_wrapper0.sv     \
      "
 
 set ::env(VERILOG_INCLUDE_DIRS) [glob $::env(DESIGN_DIR)/../../verilog/rtl/ ]
@@ -68,7 +60,7 @@ set ::env(SDC_FILE) $::env(DESIGN_DIR)/base.sdc
 set ::env(BASE_SDC_FILE) $::env(DESIGN_DIR)/base.sdc
 
 set ::env(LEC_ENABLE) 0
-set ::env(SYNTH_ENB_CG) 1
+#set ::env(SYNTH_ENB_CG) 1
 
 set ::env(VDD_PIN) [list {vccd1}]
 set ::env(GND_PIN) [list {vssd1}]
@@ -80,7 +72,7 @@ set ::env(GND_PIN) [list {vssd1}]
 set ::env(FP_PIN_ORDER_CFG) $::env(DESIGN_DIR)/pin_order.cfg
 
 set ::env(FP_SIZING) absolute
-set ::env(DIE_AREA) "0 0 400 560"
+set ::env(DIE_AREA) "0 0 400 400"
 
 
 # If you're going to use multiple power domains, then keep this disabled.
@@ -90,7 +82,7 @@ set ::env(RUN_CVC) 0
 
 
 set ::env(PL_TIME_DRIVEN) 1
-set ::env(PL_TARGET_DENSITY) "0.45"
+set ::env(PL_TARGET_DENSITY) "0.60"
 #set ::env(GRT_ALLOW_CONGESTION) {1}
 #set ::env(GRT_ADJUSTMENT) 0.2
 #set ::env(CELL_PAD) "8"

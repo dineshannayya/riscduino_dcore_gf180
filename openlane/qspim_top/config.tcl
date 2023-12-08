@@ -54,6 +54,7 @@ set ::env(VERILOG_FILES) "\
 	    $::env(DESIGN_DIR)/../../verilog/rtl/lib/ctech_cells.sv     \
 	"
 
+set ::env(VERILOG_INCLUDE_DIRS) [glob $::env(DESIGN_DIR)/../../verilog/rtl ]
 set ::env(SYNTH_DEFINES) [list SYNTHESIS GF180NM ]
 set ::env(SYNTH_READ_BLACKBOX_LIB) 1
 set ::env(SDC_FILE) $::env(DESIGN_DIR)/base.sdc
@@ -73,13 +74,13 @@ set ::env(GND_PIN) [list {vssd1}]
 set ::env(FP_PIN_ORDER_CFG) $::env(DESIGN_DIR)/pin_order.cfg
 
 set ::env(FP_SIZING) absolute
-set ::env(DIE_AREA) "0 0 850 850"
+set ::env(DIE_AREA) "0 0 750 750"
 
 #set ::env(GRT_OBS) "                              \
 #	                met4  0 0 450 550"
 
 set ::env(PL_TIME_DRIVEN) 1
-set ::env(PL_TARGET_DENSITY) "0.43"
+set ::env(PL_TARGET_DENSITY) "0.58"
 set ::env(GPL_CELL_PADDING) "2"
 
 # If you're going to use multiple power domains, then keep this disabled.

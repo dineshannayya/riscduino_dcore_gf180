@@ -12,6 +12,7 @@
        0x1001_00C0 to 0x1001_00FF  - SSPIM
        0x1001_0100 to 0x1001_013F  - UART1
        0x1002_0000 to 0x1002_00FF  - PINMUX
+       0x1002_0000 to 0x1002_00FF  - PINMUX
 ****/
 `define USER_ADDR0_QSPI        32'h0000_0000
 `define USER_ADDR1_QSPI        32'h1000_0000
@@ -22,6 +23,10 @@
 `define USER_ADDR1_UART        32'h1001_0100
 `define USER_ADDR0_PINMUX      32'h1002_0000
 `define USER_ADDR0_PERI        32'h1002_0100
+`define USER_ADDR1_PERI        32'h1002_0200
+`define USER_ADDR0_WBI         32'h1003_0000
+`define USER_ADDR0_WBHOST      32'h1004_0000
+`define USER_ADDR0_RISCV       32'h1005_0000
 
 `define USER_ADDR0_MASK_QSPI   32'hF000_0000
 `define USER_ADDR1_MASK_QSPI   32'hFFFF_FF00
@@ -32,7 +37,35 @@
 `define USER_ADDR1_MASK_UART   32'hFFFF_FFC0
 `define USER_ADDR0_MASK_PINMUX 32'hFFFF_FF00
 `define USER_ADDR0_MASK_PERI   32'hFFFF_FF00
+`define USER_ADDR1_MASK_PERI   32'hFFFF_FF00
+`define USER_ADDR0_MASK_WBI    32'hFFFF_FF00
+`define USER_ADDR0_MASK_WBHOST 32'hFFFF_FF00
+`define USER_ADDR0_MASK_RISCV  32'hFFFF_FF00
 
+//---------------------------------------
+// Wishbone Inter-connect Slave ID
+//---------------------------------------
+`define WBI_SID_NULL           4'h0
+`define WBI_SID_QSPI           4'h1
+`define WBI_SID_UART           4'h2
+`define WBI_SID_USB            4'h3
+`define WBI_SID_SSPI_I2C       4'h4
+`define WBI_SID_PINMUX         4'h5
+`define WBI_SID_PERI0          4'h6
+`define WBI_SID_PERI1          4'h7
+`define WBI_SID_WBI            4'h8
+`define WBI_SID_WBHOST         4'h9
+`define WBI_SID_RISCV          4'hA
+
+//---------------------------------------
+// Wishbone Inter-connect Master ID
+//---------------------------------------
+`define WBI_MID_WBHOST         4'h1
+`define WBI_MID_UART           4'h2
+`define WBI_MID_I2C            4'h3
+`define WBI_MID_USB            4'h4
+`define WBI_MID_SSPI           4'h5
+`define WBI_MID_RISCV          4'h6
 
 // Note in caravel, 0x300X_XXXX only come to user interface
 // So, using wb_host bank select we have changing MSB address [31:16] = 0x1000

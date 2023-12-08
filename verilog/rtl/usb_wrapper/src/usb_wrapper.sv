@@ -64,6 +64,7 @@
 ////                                                              ////
 //////////////////////////////////////////////////////////////////////
 
+`include "user_reg_map.v"
 `include "user_params.svh"
 module usb_wrapper 
 
@@ -91,8 +92,10 @@ module usb_wrapper
    input logic [3:0]   reg_be,
 
         // Outputs
+   output logic [3:0]  reg_sid,
    output logic [31:0] reg_rdata,
    output logic        reg_ack,
+   output logic        reg_err,
 
    // USB 1.1 HOST I/F
    input  logic        usbh_in_dp              ,
@@ -116,6 +119,9 @@ module usb_wrapper
 
 
      );
+
+assign reg_sid = `WBI_SID_USB;
+assign reg_err = 1'b0;
 
 // uart clock skew control
 clk_skew_adjust u_skew_uart

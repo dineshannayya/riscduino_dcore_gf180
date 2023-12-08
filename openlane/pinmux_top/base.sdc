@@ -6,7 +6,7 @@ current_design pinmux
 ###############################################################################
 # Timing Constraints
 ###############################################################################
-create_clock -name mclk -period 10.0000 [get_ports {mclk}]
+create_clock -name mclk -period 20.0000 [get_ports {mclk}]
 create_clock -name user_clock1 -period 10.0000 [get_ports {user_clock1}]
 create_clock -name user_clock2 -period 10.0000 [get_ports {user_clock2}]
 create_clock -name rtc_ref_clk -period 50.0000  [get_pins {u_glbl_reg.u_rtc_ref_clkbuf.u_buf/X}]
@@ -49,8 +49,8 @@ set_case_analysis 0 [get_ports {cfg_cska_pinmux[3]}]
 
 
 set_max_delay   3.5 -from [get_ports {wbd_clk_int}]
-set_max_delay   2 -to   [get_ports {wbd_clk_pinmux}]
-set_max_delay 3.5 -from wbd_clk_int -to wbd_clk_pinmux
+set_max_delay   2 -to   [get_ports {wbd_clk_skew}]
+set_max_delay 3.5 -from wbd_clk_int -to wbd_clk_skew
 
 
 set_input_delay -max 4.0000 -clock [get_clocks {mclk}] -add_delay [get_ports {reg_addr[*]}]

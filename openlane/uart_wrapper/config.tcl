@@ -83,7 +83,7 @@ set ::env(GND_PIN) [list {vssd1}]
 
 set ::env(FP_PIN_ORDER_CFG) $::env(DESIGN_DIR)/pin_order.cfg
 set ::env(FP_SIZING) "absolute"
-set ::env(DIE_AREA) "0 0 600 950"
+set ::env(DIE_AREA) "0 0 800 600"
 
 
 
@@ -94,7 +94,7 @@ set ::env(RUN_CVC) 0
 
 
 set ::env(PL_TIME_DRIVEN) 1
-set ::env(PL_TARGET_DENSITY) "0.55"
+set ::env(PL_TARGET_DENSITY) "0.61"
 set ::env(GPL_CELL_PADDING) "2"
 set ::env(GRT_ALLOW_CONGESTION) {1}
 

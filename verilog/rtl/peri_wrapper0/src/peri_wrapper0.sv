@@ -38,9 +38,10 @@
 ////    0.1 - 19th Nov 2023, Dinesh A                             ////
 ////          initial version                                     ////
 //////////////////////////////////////////////////////////////////////
+`include "user_reg_map.v"
 `include "user_params.svh"
 
-module peri_wrapper1 (
+module peri_wrapper0 (
                     `ifdef USE_POWER_PINS
                        input logic             vccd1,// User area 1 1.8V supply
                        input logic             vssd1,// User area 1 digital ground
@@ -68,8 +69,10 @@ module peri_wrapper1 (
                        input logic [3:0]       reg_be,
 
                        // Outputs
+                       output logic [3:0]      reg_sid,
                        output logic [31:0]     reg_rdata,
-                       output logic            reg_ack
+                       output logic            reg_ack,
+                       output logic            reg_err
 
                
    ); 
@@ -93,6 +96,8 @@ logic         reg_timer_cs;
 logic         reg_ws_cs   ;
 
 
+assign reg_sid = `WBI_SID_PERI0;
+assign reg_err = 1'b0;
 
 // skew control
 clk_skew_adjust u_skew_pinmux

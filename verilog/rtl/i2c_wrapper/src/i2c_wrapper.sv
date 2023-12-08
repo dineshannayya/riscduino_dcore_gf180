@@ -63,6 +63,7 @@
 //////////////////////////////////////////////////////////////////////
 
 
+`include "user_reg_map.v"
 `include "user_params.svh"
 module i2c_wrapper 
 
@@ -88,8 +89,10 @@ module i2c_wrapper
    input logic [3:0]   reg_slv_be,
 
    // Outputs
+   output logic [3:0]  reg_slv_sid,
    output logic [31:0] reg_slv_rdata,
    output logic        reg_slv_ack,
+   output logic        reg_slv_err,
 
    /////////////////////////////////////////////////////////
    // i2c interface
@@ -110,6 +113,10 @@ module i2c_wrapper
 
 
      );
+
+
+assign reg_slv_sid = `WBI_SID_I2C;
+assign reg_slv_err = 1'b0;
 
 // sspi clock skew control
 clk_skew_adjust u_skew_i2c

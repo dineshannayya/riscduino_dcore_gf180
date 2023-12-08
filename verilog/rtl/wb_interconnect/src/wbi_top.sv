@@ -57,18 +57,6 @@
 //// from http://www.opencores.org/lgpl.shtml                     ////
 ////                                                              ////
 //////////////////////////////////////////////////////////////////////
-//------------------------------
-// RISC Data Memory Map
-// 0x0000_0000 to 0x0FFF_FFFF  - QSPIM MEMORY
-// 0x1000_0000 to 0x1000_00FF  - QSPIM REG
-// 0x1001_0000 to 0x1001_003F  - UART0
-// 0x1001_0040 to 0x1001_007F  - I2
-// 0x1001_0080 to 0x1001_00BF  - USB
-// 0x1001_00C0 to 0x1001_00FF  - SSPIM
-// 0x1001_0100 to 0x1001_013F  - UART1
-// 0x1002_0000 to 0x1002_00FF  - PINMUX
-// 0x1003_0000 to 0x1003_00FF  - WBI
-//-----------------------------
 
 `include "user_reg_map.v"
 
@@ -78,13 +66,7 @@ module wbi_top
          input logic            vccd1,    // User area 1 1.8V supply
          input logic            vssd1,    // User area 1 digital ground
 `endif
-
-         // Clock Skew Adjust
-         input logic [3:0]      cfg_cska_wi,
-         input logic            wbd_clk_int,
-	     output logic           wbd_clk_wi,
-
-         input logic            mclk_raw, // clock without any clk skew
+         input logic            mclk_raw,
          input logic		    clk_i, 
          input logic            rst_n,
 
@@ -96,6 +78,11 @@ module wbi_top
          input   logic  	    m0_wbd_we_i,
          input   logic  	    m0_wbd_cyc_i,
          input   logic  	    m0_wbd_stb_i,
+
+         input   logic [3:0]  	m0_wbd_mid_i,   // Master ID
+         input   logic  	    m0_wbd_bry_i,
+         input   logic [9:0] 	m0_wbd_bl_i,
+         
          output  logic	[31:0]	m0_wbd_dat_o,
          output  logic		    m0_wbd_ack_o,
          output  logic		    m0_wbd_lack_o,
@@ -105,10 +92,12 @@ module wbi_top
          // Slave 0 Interface
          output logic           s0_mclk,
          input  logic           s0_idle,
+         input  logic [3:0]     s0_wbd_sid_i,
          input	logic [31:0]	s0_wbd_dat_i,
          input	logic 	        s0_wbd_ack_i,
          input	logic 	        s0_wbd_lack_i,
-       //input	logic 	        s0_wbd_err_i, - unused
+         input	logic 	        s0_wbd_err_i, 
+
          output	logic [31:0]	s0_wbd_dat_o,
          output	logic [31:0]	s0_wbd_adr_o,
          output	logic [3:0]	    s0_wbd_sel_o,
@@ -125,6 +114,10 @@ module wbi_top
          input   logic  	    m1_wbd_we_i,
          input   logic  	    m1_wbd_cyc_i,
          input   logic  	    m1_wbd_stb_i,
+         input   logic [3:0]  	m1_wbd_mid_i,   // Master ID
+         input   logic  	    m1_wbd_bry_i,
+         input   logic [9:0] 	m1_wbd_bl_i,
+
          output  logic	[31:0]	m1_wbd_dat_o,
          output  logic		    m1_wbd_ack_o,
          output  logic		    m1_wbd_lack_o,
@@ -132,11 +125,12 @@ module wbi_top
 
          // Slave 1 Interface - uart
          output logic           s1_mclk,
+         input  logic [3:0]     s1_wbd_sid_i,
          input	logic [31:0]	s1_wbd_dat_i,
          input	logic 	        s1_wbd_ack_i,
-      // input	logic 	        s1_wbd_err_i, - unused
+         input	logic 	        s1_wbd_err_i, 
          output	logic [31:0]	s1_wbd_dat_o,
-         output	logic [10:0]    s1_wbd_adr_o, // Uart
+         output	logic [10:0]    s1_wbd_adr_o, 
          output	logic [3:0]	    s1_wbd_sel_o,
          output	logic 	        s1_wbd_we_o,
          output	logic 	        s1_wbd_cyc_o,
@@ -144,11 +138,12 @@ module wbi_top
          
          // Slave 2 Interface - usb
          output logic           s2_mclk,
+         input  logic [3:0]     s2_wbd_sid_i,
          input	logic [31:0]	s2_wbd_dat_i,
          input	logic 	        s2_wbd_ack_i,
-      // input	logic 	        s2_wbd_err_i, - unused
+         input	logic 	        s2_wbd_err_i,
          output	logic [31:0]	s2_wbd_dat_o,
-         output	logic [10:0]	s2_wbd_adr_o, // glbl reg need only 9 bits
+         output	logic [10:0]	s2_wbd_adr_o, 
          output	logic [3:0]	    s2_wbd_sel_o,
          output	logic 	        s2_wbd_we_o,
          output	logic 	        s2_wbd_cyc_o,
@@ -161,6 +156,10 @@ module wbi_top
          input   logic  	    m2_wbd_we_i,
          input   logic  	    m2_wbd_cyc_i,
          input   logic  	    m2_wbd_stb_i,
+         input   logic [3:0]  	m2_wbd_mid_i,   // Master ID
+         input   logic  	    m2_wbd_bry_i,
+         input   logic [9:0] 	m2_wbd_bl_i,
+
          output  logic	[31:0]	m2_wbd_dat_o,
          output  logic		    m2_wbd_ack_o,
          output  logic		    m2_wbd_lack_o,
@@ -168,51 +167,59 @@ module wbi_top
 
          // Slave 3 Interface - sspi
          output logic           s3_mclk,
+         input  logic [3:0]     s3_wbd_sid_i,
          input	logic [31:0]	s3_wbd_dat_i,
          input	logic 	        s3_wbd_ack_i,
-      // input	logic 	        s3_wbd_err_i, - unused
+         input	logic 	        s3_wbd_err_i,
          output	logic [31:0]	s3_wbd_dat_o,
-         output	logic [10:0]	s3_wbd_adr_o, // glbl reg need only 9 bits
+         output	logic [10:0]	s3_wbd_adr_o,
          output	logic [3:0]	    s3_wbd_sel_o,
          output	logic 	        s3_wbd_we_o,
          output	logic 	        s3_wbd_cyc_o,
          output	logic 	        s3_wbd_stb_o,
 
-         // Slave 4 Interface - i2c
+         // Master 3 Interface - Riscv
+         output  logic          m3_mclk,
+         input   logic	[31:0]	m3_wbd_dat_i,
+         input   logic  [31:0]	m3_wbd_adr_i,
+         input   logic  [3:0]	m3_wbd_sel_i,
+         input   logic  	    m3_wbd_we_i,
+         input   logic  	    m3_wbd_cyc_i,
+         input   logic  	    m3_wbd_stb_i,
+         input   logic [3:0]  	m3_wbd_mid_i,   // Master ID
+         input   logic  	    m3_wbd_bry_i,
+         input   logic [9:0] 	m3_wbd_bl_i,
+
+         output  logic	[31:0]	m3_wbd_dat_o,
+         output  logic		    m3_wbd_ack_o,
+         output  logic		    m3_wbd_lack_o,
+         output  logic		    m3_wbd_err_o,
+
+         // Slave 4 Interface - pinmux
          output logic           s4_mclk,
+         input  logic [3:0]     s4_wbd_sid_i,
          input	logic [31:0]	s4_wbd_dat_i,
          input	logic 	        s4_wbd_ack_i,
-      // input	logic 	        s4_wbd_err_i, - unused
+         input	logic 	        s4_wbd_err_i,
          output	logic [31:0]	s4_wbd_dat_o,
-         output	logic [10:0]	s4_wbd_adr_o, // glbl reg need only 9 bits
+         output	logic [10:0]	s4_wbd_adr_o,
          output	logic [3:0]	    s4_wbd_sel_o,
          output	logic 	        s4_wbd_we_o,
          output	logic 	        s4_wbd_cyc_o,
          output	logic 	        s4_wbd_stb_o,
 
-         // Slave 5 Interface - pinmux
+         // Slave 5 Interface - peri
          output logic           s5_mclk,
+         input  logic [3:0]     s5_wbd_sid_i,
          input	logic [31:0]	s5_wbd_dat_i,
          input	logic 	        s5_wbd_ack_i,
-      // input	logic 	        s5_wbd_err_i, - unused
+         input	logic 	        s5_wbd_err_i, 
          output	logic [31:0]	s5_wbd_dat_o,
-         output	logic [10:0]	s5_wbd_adr_o, // glbl reg need only 9 bits
+         output	logic [10:0]	s5_wbd_adr_o,
          output	logic [3:0]	    s5_wbd_sel_o,
          output	logic 	        s5_wbd_we_o,
          output	logic 	        s5_wbd_cyc_o,
-         output	logic 	        s5_wbd_stb_o,
-
-         // Slave 6 Interface - peri
-         output logic           s6_mclk,
-         input	logic [31:0]	s6_wbd_dat_i,
-         input	logic 	        s6_wbd_ack_i,
-      // input	logic 	        s6_wbd_err_i, - unused
-         output	logic [31:0]	s6_wbd_dat_o,
-         output	logic [10:0]	s6_wbd_adr_o, // glbl reg need only 9 bits
-         output	logic [3:0]	    s6_wbd_sel_o,
-         output	logic 	        s6_wbd_we_o,
-         output	logic 	        s6_wbd_cyc_o,
-         output	logic 	        s6_wbd_stb_o
+         output	logic 	        s5_wbd_stb_o
 	);
 
 ////////////////////////////////////////////////////////////////////
@@ -242,6 +249,7 @@ typedef struct packed {
 
 // WishBone Rd Interface
 typedef struct packed { 
+  logic [3:0] 	wbd_sid; // slave  id
   logic	[31:0]	wbd_dat;
   logic  	    wbd_ack;
   logic  	    wbd_lack;
@@ -387,6 +395,22 @@ type_wb_res_data_intf s3d_res_data;
 type_wb_cmd_ctrl_intf s3d_cmd_ctrl;
 type_wb_res_ctrl_intf s3d_res_ctrl;
 
+// M3
+type_wb_wr_intf m3_wb_wr;
+type_wb_rd_intf m3_wb_rd;
+
+type_wb_cmd_data_intf m3p_cmd_data;
+type_wb_res_data_intf m3p_res_data;
+
+type_wb_cmd_ctrl_intf m3p_cmd_ctrl;
+type_wb_res_ctrl_intf m3p_res_ctrl;
+
+type_wb_cmd_data_intf m3d_cmd_data;
+type_wb_res_data_intf m3d_res_data;
+
+type_wb_cmd_ctrl_intf m3d_cmd_ctrl;
+type_wb_res_ctrl_intf m3d_res_ctrl;
+
 // S4
 type_wb_wr_intf s4_wb_wr;
 type_wb_rd_intf s4_wb_rd;
@@ -419,46 +443,18 @@ type_wb_res_data_intf s5d_res_data;
 type_wb_cmd_ctrl_intf s5d_cmd_ctrl;
 type_wb_res_ctrl_intf s5d_res_ctrl;
 
-// S6
-type_wb_wr_intf        s6_wb_wr;
-type_wb_rd_intf        s6_wb_rd;
-
-type_wb_cmd_data_intf s6p_cmd_data;
-type_wb_res_data_intf s6p_res_data;
-
-type_wb_cmd_ctrl_intf s6p_cmd_ctrl;
-type_wb_res_ctrl_intf s6p_res_ctrl;
-
-type_wb_cmd_data_intf s6d_cmd_data;
-type_wb_res_data_intf s6d_res_data;
-
-type_wb_cmd_ctrl_intf s6d_cmd_ctrl;
-type_wb_res_ctrl_intf s6d_res_ctrl;
 
 //--------------------------------------
 
-
-
-// Wishbone interconnect clock skew control
-clk_skew_adjust u_skew_wi
-       (
-`ifdef USE_POWER_PINS
-               .vccd1      (vccd1                      ),// User area 1 1.8V supply
-               .vssd1      (vssd1                      ),// User area 1 digital ground
-`endif
-	       .clk_in         (wbd_clk_int                 ), 
-	       .sel            (cfg_cska_wi                 ), 
-	       .clk_out        (wbd_clk_wi                  ) 
-       );
 
 
 // ---------------------------------------------
 // Master-0 Mapping
 // ---------------------------------------------
 assign m0_mclk           = mclk_raw;
-assign m0_wb_wr.wbd_bl   = 'h1;
-assign m0_wb_wr.wbd_bry  = 1'b1;
-assign m0_wb_wr.wbd_tid  = M_WB_HOST;
+assign m0_wb_wr.wbd_bl   = m0_wbd_bl_i;
+assign m0_wb_wr.wbd_bry  = m0_wbd_bry_i;
+assign m0_wb_wr.wbd_tid  = m0_wbd_mid_i;
 assign m0_wb_wr.wbd_dat  = m0_wbd_dat_i;
 assign m0_wb_wr.wbd_adr  = m0_wbd_adr_i;
 assign m0_wb_wr.wbd_sel  = m0_wbd_sel_i;
@@ -485,18 +481,19 @@ assign  s0_wbd_bry_o =  s0_wb_wr.wbd_bry ;
 assign  s0_wbd_we_o  =  s0_wb_wr.wbd_we  ;
 assign  s0_wbd_cyc_o =  s0_wb_wr.wbd_cyc ;
 assign  s0_wbd_stb_o =  s0_wb_wr.wbd_stb ;
-                     
+
+assign s0_wb_rd.wbd_sid   = s0_wbd_sid_i ;
 assign s0_wb_rd.wbd_dat   = s0_wbd_dat_i ;
 assign s0_wb_rd.wbd_ack   = s0_wbd_ack_i ;
 assign s0_wb_rd.wbd_lack  = s0_wbd_lack_i ;
-assign s0_wb_rd.wbd_err  = 1'b0; // s0_wbd_err_i ; - unused
+assign s0_wb_rd.wbd_err   = s0_wbd_err_i ; 
 
 // ---------------------------------------------
 // Master-1 Mapping
 // ---------------------------------------------
-assign m1_wb_wr.wbd_bl   = 'h1;
-assign m1_wb_wr.wbd_bry  = 1'b1;
-assign m1_wb_wr.wbd_tid  = M_UART_HOST;
+assign m1_wb_wr.wbd_bl   = m1_wbd_bl_i;
+assign m1_wb_wr.wbd_bry  = m1_wbd_bry_i;
+assign m1_wb_wr.wbd_tid  = m1_wbd_mid_i;
 assign m1_wb_wr.wbd_dat  = m1_wbd_dat_i;
 assign m1_wb_wr.wbd_adr  = m1_wbd_adr_i;
 assign m1_wb_wr.wbd_sel  = m1_wbd_sel_i;
@@ -519,10 +516,11 @@ assign  s1_wbd_we_o  =  s1_wb_wr.wbd_we  ;
 assign  s1_wbd_cyc_o =  s1_wb_wr.wbd_cyc ;
 assign  s1_wbd_stb_o =  s1_wb_wr.wbd_stb ;
 
-assign s1_wb_rd.wbd_dat  = s1_wbd_dat_i ;
-assign s1_wb_rd.wbd_ack  = s1_wbd_ack_i ;
+assign s1_wb_rd.wbd_sid   = s1_wbd_sid_i ;
+assign s1_wb_rd.wbd_dat   = s1_wbd_dat_i ;
+assign s1_wb_rd.wbd_ack   = s1_wbd_ack_i ;
 assign s1_wb_rd.wbd_lack  = s1_wbd_ack_i ;
-assign s1_wb_rd.wbd_err  = 1'b0; // s1_wbd_err_i ; - unused
+assign s1_wb_rd.wbd_err   = s1_wbd_err_i ;
                       
 //----------------------------------------
 // Slave-2 Port Mapping
@@ -535,17 +533,18 @@ assign  s2_wbd_we_o  =  s2_wb_wr.wbd_we  ;
 assign  s2_wbd_cyc_o =  s2_wb_wr.wbd_cyc ;
 assign  s2_wbd_stb_o =  s2_wb_wr.wbd_stb ;
 
+assign s2_wb_rd.wbd_sid  = s2_wbd_sid_i ;
 assign s2_wb_rd.wbd_dat  = s2_wbd_dat_i ;
 assign s2_wb_rd.wbd_ack  = s2_wbd_ack_i ;
 assign s2_wb_rd.wbd_lack = s2_wbd_ack_i ;
-assign s2_wb_rd.wbd_err  = 1'b0; // s2_wbd_err_i ; - unused
+assign s2_wb_rd.wbd_err  = s2_wbd_err_i ; 
 
 // ---------------------------------------------
 // Master-2 Mapping
 // ---------------------------------------------
-assign m2_wb_wr.wbd_bl   = 'h1;
-assign m2_wb_wr.wbd_bry  = 1'b1;
-assign m2_wb_wr.wbd_tid  = M_SSPI_HOST;
+assign m2_wb_wr.wbd_bl   = m2_wbd_bl_i;
+assign m2_wb_wr.wbd_bry  = m2_wbd_bry_i;
+assign m2_wb_wr.wbd_tid  = m2_wbd_mid_i;
 assign m2_wb_wr.wbd_dat  = m2_wbd_dat_i;
 assign m2_wb_wr.wbd_adr  = m2_wbd_adr_i;
 assign m2_wb_wr.wbd_sel  = m2_wbd_sel_i;
@@ -568,10 +567,30 @@ assign  s3_wbd_we_o       =  s3_wb_wr.wbd_we  ;
 assign  s3_wbd_cyc_o      =  s3_wb_wr.wbd_cyc ;
 assign  s3_wbd_stb_o      =  s3_wb_wr.wbd_stb ;
 
+assign  s3_wb_rd.wbd_sid  =  s3_wbd_sid_i ;
 assign  s3_wb_rd.wbd_dat  =  s3_wbd_dat_i ;
 assign  s3_wb_rd.wbd_ack  =  s3_wbd_ack_i ;
 assign  s3_wb_rd.wbd_lack =  s3_wbd_ack_i ;
-assign  s3_wb_rd.wbd_err  =  1'b0; // s2_wbd_err_i ; - unused
+assign  s3_wb_rd.wbd_err  =  s3_wbd_err_i ; 
+
+// ---------------------------------------------
+// Master-3 Mapping
+// ---------------------------------------------
+assign m3_mclk           = mclk_raw;
+assign m3_wb_wr.wbd_bl   = m3_wbd_bl_i;
+assign m3_wb_wr.wbd_bry  = m3_wbd_bry_i;
+assign m3_wb_wr.wbd_tid  = m3_wbd_mid_i;
+assign m3_wb_wr.wbd_dat  = m3_wbd_dat_i;
+assign m3_wb_wr.wbd_adr  = m3_wbd_adr_i;
+assign m3_wb_wr.wbd_sel  = m3_wbd_sel_i;
+assign m3_wb_wr.wbd_we   = m3_wbd_we_i;
+assign m3_wb_wr.wbd_cyc  = m3_wbd_cyc_i;
+assign m3_wb_wr.wbd_stb  = m3_wbd_stb_i;
+
+assign m3_wbd_dat_o      = m3_wb_rd.wbd_dat;
+assign m3_wbd_ack_o      = m3_wb_rd.wbd_ack;
+assign m3_wbd_lack_o     = m3_wb_rd.wbd_lack;
+assign m3_wbd_err_o      = m3_wb_rd.wbd_err;
 
 //--------------------------------------
 // Slave-4 Port Mapping
@@ -584,10 +603,11 @@ assign  s4_wbd_we_o       =  s4_wb_wr.wbd_we  ;
 assign  s4_wbd_cyc_o      =  s4_wb_wr.wbd_cyc ;
 assign  s4_wbd_stb_o      =  s4_wb_wr.wbd_stb ;
 
+assign  s4_wb_rd.wbd_sid  =  s4_wbd_sid_i ;
 assign  s4_wb_rd.wbd_dat  =  s4_wbd_dat_i ;
 assign  s4_wb_rd.wbd_ack  =  s4_wbd_ack_i ;
 assign  s4_wb_rd.wbd_lack =  s4_wbd_ack_i ;
-assign  s4_wb_rd.wbd_err  =  1'b0; // s2_wbd_err_i ; - unused
+assign  s4_wb_rd.wbd_err  =  s4_wbd_err_i ; 
 
 //--------------------------------------
 // Slave-5 Port Mapping
@@ -600,26 +620,12 @@ assign  s5_wbd_we_o       =  s5_wb_wr.wbd_we  ;
 assign  s5_wbd_cyc_o      =  s5_wb_wr.wbd_cyc ;
 assign  s5_wbd_stb_o      =  s5_wb_wr.wbd_stb ;
 
+assign  s5_wb_rd.wbd_sid  =  s5_wbd_sid_i ;
 assign  s5_wb_rd.wbd_dat  =  s5_wbd_dat_i ;
 assign  s5_wb_rd.wbd_ack  =  s5_wbd_ack_i ;
 assign  s5_wb_rd.wbd_lack =  s5_wbd_ack_i ;
-assign  s5_wb_rd.wbd_err  =  1'b0; // s2_wbd_err_i ; - unused
+assign  s5_wb_rd.wbd_err  =  s5_wbd_err_i ; 
 
-//--------------------------------------
-// Slave-6 Port Mapping
-// -------------------------------------
-assign  s6_mclk           =  mclk_raw;
-assign  s6_wbd_dat_o      =  s6_wb_wr.wbd_dat ;
-assign  s6_wbd_adr_o      =  s6_wb_wr.wbd_adr[10:0] ; // Global Reg Need 8 bit
-assign  s6_wbd_sel_o      =  s6_wb_wr.wbd_sel ;
-assign  s6_wbd_we_o       =  s6_wb_wr.wbd_we  ;
-assign  s6_wbd_cyc_o      =  s6_wb_wr.wbd_cyc ;
-assign  s6_wbd_stb_o      =  s6_wb_wr.wbd_stb ;
-
-assign  s6_wb_rd.wbd_dat  =  s6_wbd_dat_i ;
-assign  s6_wb_rd.wbd_ack  =  s6_wbd_ack_i ;
-assign  s6_wb_rd.wbd_lack =  s6_wbd_ack_i ;
-assign  s6_wb_rd.wbd_err  =  1'b0; // s2_wbd_err_i ; - unused
 //------------------------------------------
 // Command Daisy Chain
 //------------------------------------------
@@ -666,12 +672,19 @@ assign s3p_res_ctrl = m2d_res_ctrl;
 assign m2d_cmd_ctrl = s3p_cmd_ctrl;
 assign m2d_res_data = s3p_res_data;
 
-//S3 => S4
-assign s4p_cmd_data = s3d_cmd_data;
-assign s4p_res_ctrl = s3d_res_ctrl;
+//S3 => M3
+assign m3p_cmd_data = s3d_cmd_data;
+assign m3p_res_ctrl = s3d_res_ctrl;
 
-assign s3d_cmd_ctrl = s4p_cmd_ctrl;
-assign s3d_res_data = s4p_res_data;
+assign s3d_cmd_ctrl = m3p_cmd_ctrl;
+assign s3d_res_data = m3p_res_data;
+
+//M3 => S4
+assign s4p_cmd_data = m3d_cmd_data;
+assign s4p_res_ctrl = m3d_res_ctrl;
+
+assign m3d_cmd_ctrl = s4p_cmd_ctrl;
+assign m3d_res_data = s4p_res_data;
 
 //S4 => S5
 assign s5p_cmd_data = s4d_cmd_data;
@@ -680,25 +693,26 @@ assign s5p_res_ctrl = s4d_res_ctrl;
 assign s4d_cmd_ctrl = s5p_cmd_ctrl;
 assign s4d_res_data = s5p_res_data;
 
-//S5 => S6
-assign s6p_cmd_data = s5d_cmd_data;
-assign s6p_res_ctrl = s5d_res_ctrl;
+// S5 => M0
+assign m0p_cmd_data = s5d_cmd_data;
+assign m0p_res_ctrl = s5d_res_ctrl;
 
-assign s5d_cmd_ctrl = s6p_cmd_ctrl;
-assign s5d_res_data = s6p_res_data;
-
-// S6 => M0
-assign m0p_cmd_data = s6d_cmd_data;
-assign m0p_res_ctrl = s6d_res_ctrl;
-
-assign s6d_cmd_ctrl = m0p_cmd_ctrl;
-assign s6d_res_data = m0p_res_data;
+assign s5d_cmd_ctrl = m0p_cmd_ctrl;
+assign s5d_res_data = m0p_res_data;
 
 //----------------------------------------------------------
 // M0: WISHBONE HOST MASTER
 //----------------------------------------------------------
 
-wbi_master_port #(.CDP(2), .RDP(2)) u_m0 (
+wbi_master_port_m0 #(
+`ifndef SYNTHESIS
+     .CDP(2), .RDP(2)
+`endif
+    ) u_m0 (
+`ifdef USE_POWER_PINS
+        .vccd1            (vccd1                       ),    // User area 1 1.8V supply
+        .vssd1            (vssd1                       ),    // User area 1 digital ground
+`endif
        .reset_n           (rst_n                       ),  // Regular Reset signal
        .mclk              (clk_i                       ),  // System clock
                              
@@ -760,27 +774,20 @@ wbi_master_port #(.CDP(2), .RDP(2)) u_m0 (
 //----------------------------------------------------------
 // S0: QSPI
 //----------------------------------------------------------
-wbi_slave_port 
+wbi_slave_port_s0 
      #(
-       .CDP (4), // CMD FIFO DEPTH
-       .RDP (2), // RESPONSE FIFO DEPTH
-       .ADDR_MATCH_VALID1    ( 1'b1),
-       .ADDR_MATCH_MASK1     ( `USER_ADDR0_MASK_QSPI),
-       .ADDR_MATCH_PATTERN1  ( `USER_ADDR0_QSPI),
-
-       .ADDR_MATCH_VALID2    ( 1'b1),
-       .ADDR_MATCH_MASK2     ( `USER_ADDR1_MASK_QSPI),
-       .ADDR_MATCH_PATTERN2  ( `USER_ADDR1_QSPI),
-
-       .ADDR_MATCH_VALID3    ( 1'b0),
-       .ADDR_MATCH_MASK3     ( 32'hFFFF_FFFF),
-       .ADDR_MATCH_PATTERN3  ( 32'hFFFF_FFFF),
-
-       .ADDR_MATCH_VALID4    ( 1'b0),
-       .ADDR_MATCH_MASK4     ( 32'hFFFF_FFFF),
-       .ADDR_MATCH_PATTERN4  ( 32'hFFFF_FFFF)
+`ifndef SYNTHESIS
+       .BENB(1), // BURST ENB
+       .SAW (32),// SLAVE ADD WIDTH
+       .CDP (2), // CMD FIFO DEPTH
+       .RDP (2)  // RESPONSE FIFO DEPTH
+`endif
 
        ) u_s0 (
+`ifdef USE_POWER_PINS
+       .vccd1             (vccd1                   ),    // User area 1 1.8V supply
+       .vssd1             (vssd1                   ),    // User area 1 digital ground
+`endif
        .reset_n           ( rst_n                  ),  // Regular Reset signal
        .mclk              ( clk_i                  ),  // System clock
                                            
@@ -828,6 +835,7 @@ wbi_slave_port
        .wbs_bl_o          ( s0_wb_wr.wbd_bl        ),  // Burst Count
        .wbs_bry_o         ( s0_wb_wr.wbd_bry       ),  // Busrt WData Avialble Or Ready To accept Rdata  
 
+       .wbs_sid_i         ( s0_wb_rd.wbd_sid       ),  // Slave ID
        .wbs_dat_i         ( s0_wb_rd.wbd_dat       ),  // data input
        .wbs_ack_i         ( s0_wb_rd.wbd_ack       ),  // acknowlegement
        .wbs_lack_i        ( s0_wb_rd.wbd_lack      ),  // Last Ack
@@ -839,7 +847,15 @@ wbi_slave_port
 // M1: UART HOST MASTER
 //----------------------------------------------------------
 
-wbi_master_port #(.CDP(2), .RDP(2)) u_m1 (
+wbi_master_port_m1 #(
+`ifndef SYNTHESIS
+.CDP(2), .RDP(2)
+`endif
+) u_m1 (
+`ifdef USE_POWER_PINS
+       .vccd1             (vccd1                   ),    // User area 1 1.8V supply
+       .vssd1             (vssd1                   ),    // User area 1 digital ground
+`endif
        .reset_n           (rst_n                       ),  // Regular Reset signal
        .mclk              (clk_i                       ),  // System clock
                              
@@ -902,27 +918,20 @@ wbi_master_port #(.CDP(2), .RDP(2)) u_m1 (
 // S1: UART
 //----------------------------------------------------------
 
-wbi_slave_port 
+wbi_slave_port_s1 
      #(
+`ifndef SYNTHESIS
+       .BENB(0), // BURST ENB
+       .SAW (11),// SLAVE ADD WIDTH
        .CDP (2), // CMD FIFO DEPTH
-       .RDP (2), // RESPONSE FIFO DEPTH
-       .ADDR_MATCH_VALID1    ( 1'b1),
-       .ADDR_MATCH_MASK1     ( `USER_ADDR0_MASK_UART),
-       .ADDR_MATCH_PATTERN1  ( `USER_ADDR0_UART),
-
-       .ADDR_MATCH_VALID2    ( 1'b1),
-       .ADDR_MATCH_MASK2     ( `USER_ADDR1_MASK_UART),
-       .ADDR_MATCH_PATTERN2  ( `USER_ADDR1_UART),
-
-       .ADDR_MATCH_VALID3    ( 1'b0),
-       .ADDR_MATCH_MASK3     ( 32'hFFFF_FFFF),
-       .ADDR_MATCH_PATTERN3  ( 32'hFFFF_FFFF),
-
-       .ADDR_MATCH_VALID4    ( 1'b0),
-       .ADDR_MATCH_MASK4     ( 32'hFFFF_FFFF),
-       .ADDR_MATCH_PATTERN4  ( 32'hFFFF_FFFF)
+       .RDP (2) // RESPONSE FIFO DEPTH
+`endif
 
        ) u_s1 (
+`ifdef USE_POWER_PINS
+       .vccd1             (vccd1                   ),    // User area 1 1.8V supply
+       .vssd1             (vssd1                   ),    // User area 1 digital ground
+`endif
        .reset_n           ( rst_n                  ),  // Regular Reset signal
        .mclk              ( clk_i                  ),  // System clock
                                            
@@ -962,7 +971,7 @@ wbi_slave_port
                                           
        .wbs_cyc_o         ( s1_wb_wr.wbd_cyc       ),  // strobe/request
        .wbs_stb_o         ( s1_wb_wr.wbd_stb       ),  // strobe/request
-       .wbs_adr_o         ( s1_wb_wr.wbd_adr       ),  // address
+       .wbs_adr_o         ( s1_wb_wr.wbd_adr[10:0] ),  // address
        .wbs_we_o          ( s1_wb_wr.wbd_we        ),  // write
        .wbs_dat_o         ( s1_wb_wr.wbd_dat       ),  // data output
        .wbs_sel_o         ( s1_wb_wr.wbd_sel       ),  // byte enable
@@ -970,6 +979,7 @@ wbi_slave_port
        .wbs_bl_o          ( s1_wb_wr.wbd_bl        ),  // Burst Count
        .wbs_bry_o         ( s1_wb_wr.wbd_bry       ),  // Busrt WData Avialble Or Ready To accept Rdata  
 
+       .wbs_sid_i         ( s1_wb_rd.wbd_sid       ),  // Slave ID
        .wbs_dat_i         ( s1_wb_rd.wbd_dat       ),  // data input
        .wbs_ack_i         ( s1_wb_rd.wbd_ack       ),  // acknowlegement
        .wbs_lack_i        ( s1_wb_rd.wbd_lack      ),  // Last Ack
@@ -981,27 +991,20 @@ wbi_slave_port
 // S2: USB
 //----------------------------------------------------------
 
-wbi_slave_port 
+wbi_slave_port_s2 
      #(
+`ifndef SYNTHESIS
+       .BENB(0), // BURST ENB
+       .SAW (11),// SLAVE ADD WIDTH
        .CDP (2), // CMD FIFO DEPTH
-       .RDP (2), // RESPONSE FIFO DEPTH
-       .ADDR_MATCH_VALID1    ( 1'b1),
-       .ADDR_MATCH_MASK1     ( `USER_ADDR0_MASK_USB),
-       .ADDR_MATCH_PATTERN1  ( `USER_ADDR0_USB),
-
-       .ADDR_MATCH_VALID2    ( 1'b0),
-       .ADDR_MATCH_MASK2     ( 32'hFFFF_FFFF),
-       .ADDR_MATCH_PATTERN2  ( 32'hFFFF_FFFF),
-
-       .ADDR_MATCH_VALID3    ( 1'b0),
-       .ADDR_MATCH_MASK3     ( 32'hFFFF_FFFF),
-       .ADDR_MATCH_PATTERN3  ( 32'hFFFF_FFFF),
-
-       .ADDR_MATCH_VALID4    ( 1'b0),
-       .ADDR_MATCH_MASK4     ( 32'hFFFF_FFFF),
-       .ADDR_MATCH_PATTERN4  ( 32'hFFFF_FFFF)
+       .RDP (2) // RESPONSE FIFO DEPTH
+`endif
 
        ) u_s2 (
+`ifdef USE_POWER_PINS
+       .vccd1             (vccd1                   ),    // User area 1 1.8V supply
+       .vssd1             (vssd1                   ),    // User area 1 digital ground
+`endif
        .reset_n           ( rst_n                  ),  // Regular Reset signal
        .mclk              ( clk_i                  ),  // System clock
                                            
@@ -1041,7 +1044,7 @@ wbi_slave_port
                                          
        .wbs_cyc_o         ( s2_wb_wr.wbd_cyc       ),  // strobe/request
        .wbs_stb_o         ( s2_wb_wr.wbd_stb       ),  // strobe/request
-       .wbs_adr_o         ( s2_wb_wr.wbd_adr       ),  // address
+       .wbs_adr_o         ( s2_wb_wr.wbd_adr[10:0] ),  // address
        .wbs_we_o          ( s2_wb_wr.wbd_we        ),  // write
        .wbs_dat_o         ( s2_wb_wr.wbd_dat       ),  // data output
        .wbs_sel_o         ( s2_wb_wr.wbd_sel       ),  // byte enable
@@ -1049,6 +1052,7 @@ wbi_slave_port
        .wbs_bl_o          ( s2_wb_wr.wbd_bl        ),  // Burst Count
        .wbs_bry_o         ( s2_wb_wr.wbd_bry       ),  // Busrt WData Avialble Or Ready To accept Rdata  
 
+       .wbs_sid_i         ( s2_wb_rd.wbd_sid       ),  // Slave ID
        .wbs_dat_i         ( s2_wb_rd.wbd_dat       ),  // data input
        .wbs_ack_i         ( s2_wb_rd.wbd_ack       ),  // acknowlegement
        .wbs_lack_i        ( s2_wb_rd.wbd_lack      ),  // Last Ack
@@ -1060,7 +1064,16 @@ wbi_slave_port
 // M2: SSPI HOST MASTER
 //----------------------------------------------------------
 
-wbi_master_port #(.CDP(2), .RDP(2)) u_m2 (
+wbi_master_port_m2 #(
+`ifndef SYNTHESIS
+     .CDP(2), .RDP(2)
+`endif
+
+      ) u_m2 (
+`ifdef USE_POWER_PINS
+       .vccd1             (vccd1                   ),    // User area 1 1.8V supply
+       .vssd1             (vssd1                   ),    // User area 1 digital ground
+`endif
        .reset_n           (rst_n                       ),  // Regular Reset signal
        .mclk              (clk_i                       ),  // System clock
                              
@@ -1119,27 +1132,20 @@ wbi_master_port #(.CDP(2), .RDP(2)) u_m2 (
 // S3: SSPI
 //----------------------------------------------------------
 
-wbi_slave_port 
+wbi_slave_port_s3 
      #(
+`ifndef SYNTHESIS
+       .BENB(0), // BURST ENB
+       .SAW (11),// SLAVE ADD WIDTH
        .CDP (2), // CMD FIFO DEPTH
-       .RDP (2), // RESPONSE FIFO DEPTH
-       .ADDR_MATCH_VALID1    ( 1'b1),
-       .ADDR_MATCH_MASK1     ( `USER_ADDR0_MASK_SSPI),
-       .ADDR_MATCH_PATTERN1  ( `USER_ADDR0_SSPI),
-
-       .ADDR_MATCH_VALID2    ( 1'b0),
-       .ADDR_MATCH_MASK2     ( 32'hFFFF_FFFF),
-       .ADDR_MATCH_PATTERN2  ( 32'hFFFF_FFFF),
-
-       .ADDR_MATCH_VALID3    ( 1'b0),
-       .ADDR_MATCH_MASK3     ( 32'hFFFF_FFFF),
-       .ADDR_MATCH_PATTERN3  ( 32'hFFFF_FFFF),
-
-       .ADDR_MATCH_VALID4    ( 1'b0),
-       .ADDR_MATCH_MASK4     ( 32'hFFFF_FFFF),
-       .ADDR_MATCH_PATTERN4  ( 32'hFFFF_FFFF)
+       .RDP (2) // RESPONSE FIFO DEPTH
+`endif
 
        ) u_s3 (
+`ifdef USE_POWER_PINS
+       .vccd1             (vccd1                   ),    // User area 1 1.8V supply
+       .vssd1             (vssd1                   ),    // User area 1 digital ground
+`endif
        .reset_n           ( rst_n                  ),  // Regular Reset signal
        .mclk              ( clk_i                  ),  // System clock
                                            
@@ -1179,7 +1185,7 @@ wbi_slave_port
                                         
        .wbs_cyc_o         ( s3_wb_wr.wbd_cyc       ),  // strobe/request
        .wbs_stb_o         ( s3_wb_wr.wbd_stb       ),  // strobe/request
-       .wbs_adr_o         ( s3_wb_wr.wbd_adr       ),  // address
+       .wbs_adr_o         ( s3_wb_wr.wbd_adr[10:0] ),  // address
        .wbs_we_o          ( s3_wb_wr.wbd_we        ),  // write
        .wbs_dat_o         ( s3_wb_wr.wbd_dat       ),  // data output
        .wbs_sel_o         ( s3_wb_wr.wbd_sel       ),  // byte enable
@@ -1187,6 +1193,7 @@ wbi_slave_port
        .wbs_bl_o          ( s3_wb_wr.wbd_bl        ),  // Burst Count
        .wbs_bry_o         ( s3_wb_wr.wbd_bry       ),  // Busrt WData Avialble Or Ready To accept Rdata  
 
+       .wbs_sid_i         ( s3_wb_rd.wbd_sid       ),  // Slave ID
        .wbs_dat_i         ( s3_wb_rd.wbd_dat       ),  // data input
        .wbs_ack_i         ( s3_wb_rd.wbd_ack       ),  // acknowlegement
        .wbs_lack_i        ( s3_wb_rd.wbd_lack      ),  // Last Ack
@@ -1195,30 +1202,94 @@ wbi_slave_port
     );
 
 //----------------------------------------------------------
-// S4: I2C
+// M3: Riscv
 //----------------------------------------------------------
 
-wbi_slave_port 
+wbi_master_port_m3 #(
+`ifndef SYNTHESIS
+     .CDP(2), .RDP(2)
+`endif
+    ) u_m3 (
+`ifdef USE_POWER_PINS
+        .vccd1            (vccd1                       ),    // User area 1 1.8V supply
+        .vssd1            (vssd1                       ),    // User area 1 digital ground
+`endif
+       .reset_n           (rst_n                       ),  // Regular Reset signal
+       .mclk              (clk_i                       ),  // System clock
+                             
+       // Wb I/F - Entry             
+       .wbm_cyc_i         (m3_wb_wr.wbd_cyc            ),  // strobe/request
+       .wbm_stb_i         (m3_wb_wr.wbd_stb            ),  // strobe/request
+       .wbm_adr_i         (m3_wb_wr.wbd_adr            ),  // address
+       .wbm_we_i          (m3_wb_wr.wbd_we             ),  // write
+       .wbm_dat_i         (m3_wb_wr.wbd_dat            ),  // data output
+       .wbm_sel_i         (m3_wb_wr.wbd_sel            ),  // byte enable
+       .wbm_tid_i         (m3_wb_wr.wbd_tid            ),
+       .wbm_bl_i          (m3_wb_wr.wbd_bl             ),  // Burst Count
+       .wbm_bry_i         (m3_wb_wr.wbd_bry            ),  // Burst Ready
+
+       .wbm_dat_o         (m3_wb_rd.wbd_dat            ),  // data input
+       .wbm_ack_o         (m3_wb_rd.wbd_ack            ),  // acknowlegement
+       .wbm_lack_o        (m3_wb_rd.wbd_lack           ),  // Last Burst access
+       .wbm_err_o         (m3_wb_rd.wbd_err            ),  // error
+                                          
+       // Previous chain - CMD                                  
+       .wbp_cmd_wrdy_o    (m3p_cmd_ctrl.wbd_wrdy       ),  // Ready path Ready to accept the data
+       .wbp_cmd_wval_i    (m3p_cmd_data.wbd_wval       ),
+       .wbp_cmd_adr_i     (m3p_cmd_data.wbd_adr        ),  // address
+       .wbp_cmd_we_i      (m3p_cmd_data.wbd_we         ),  // write
+       .wbp_cmd_dat_i     (m3p_cmd_data.wbd_dat        ),  // data output
+       .wbp_cmd_sel_i     (m3p_cmd_data.wbd_sel        ),  // byte enable
+       .wbp_cmd_tid_i     (m3p_cmd_data.wbd_tid        ),
+       .wbp_cmd_bl_i      (m3p_cmd_data.wbd_bl         ),  // Burst Count
+                                          
+       // Previous chain - RES                                  
+       .wbp_res_rrdy_i    (m3p_res_ctrl.wbd_rrdy       ),  // Ready path Ready to accept the data
+       .wbp_res_rval_o    (m3p_res_data.wbd_rval       ),
+       .wbp_res_dat_o     (m3p_res_data.wbd_dat        ),  // data input
+       .wbp_res_ack_o     (m3p_res_data.wbd_ack        ),  // acknowlegement
+       .wbp_res_lack_o    (m3p_res_data.wbd_lack       ),  // Last Burst access
+       .wbp_res_err_o     (m3p_res_data.wbd_err        ),  // error
+       .wbp_res_tid_o     (m3p_res_data.wbd_tid        ),
+                       
+       // Next Daisy chain - CMD                   
+       .wbd_cmd_wrdy_i    (m3d_cmd_ctrl.wbd_wrdy        ),  // Ready path Ready to accept the data
+       .wbd_cmd_wval_o    (m3d_cmd_data.wbd_wval        ),
+       .wbd_cmd_adr_o     (m3d_cmd_data.wbd_adr         ),  // address
+       .wbd_cmd_we_o      (m3d_cmd_data.wbd_we          ),  // write
+       .wbd_cmd_dat_o     (m3d_cmd_data.wbd_dat         ),  // data output
+       .wbd_cmd_sel_o     (m3d_cmd_data.wbd_sel         ),  // byte enable
+       .wbd_cmd_tid_o     (m3d_cmd_data.wbd_tid         ),
+       .wbd_cmd_bl_o      (m3d_cmd_data.wbd_bl          ),  // Burst Count
+                                          
+       // Next Daisy chain - RES                   
+       .wbd_res_rrdy_o    (m3d_res_ctrl.wbd_rrdy        ),  // Ready path Ready to accept the data
+       .wbd_res_rval_i    (m3d_res_data.wbd_rval        ),
+       .wbd_res_dat_i     (m3d_res_data.wbd_dat         ),  // data input
+       .wbd_res_ack_i     (m3d_res_data.wbd_ack         ),  // acknowlegement
+       .wbd_res_lack_i    (m3d_res_data.wbd_lack        ),  // Last Burst access
+       .wbd_res_err_i     (m3d_res_data.wbd_err         ),  // error
+       .wbd_res_tid_i     (m3d_res_data.wbd_tid         )
+    );
+
+//----------------------------------------------------------
+// S4: Pinmux
+//----------------------------------------------------------
+
+wbi_slave_port_s4 
      #(
+`ifndef SYNTHESIS
+       .BENB(0), // BURST ENB
+       .SAW (11),// SLAVE ADD WIDTH
        .CDP (2), // CMD FIFO DEPTH
-       .RDP (2), // RESPONSE FIFO DEPTH
-       .ADDR_MATCH_VALID1    ( 1'b1),
-       .ADDR_MATCH_MASK1     ( `USER_ADDR0_MASK_I2C),
-       .ADDR_MATCH_PATTERN1  ( `USER_ADDR0_I2C),
-
-       .ADDR_MATCH_VALID2    ( 1'b0),
-       .ADDR_MATCH_MASK2     ( 32'hFFFF_FFFF),
-       .ADDR_MATCH_PATTERN2  ( 32'hFFFF_FFFF),
-
-       .ADDR_MATCH_VALID3    ( 1'b0),
-       .ADDR_MATCH_MASK3     ( 32'hFFFF_FFFF),
-       .ADDR_MATCH_PATTERN3  ( 32'hFFFF_FFFF),
-
-       .ADDR_MATCH_VALID4    ( 1'b0),
-       .ADDR_MATCH_MASK4     ( 32'hFFFF_FFFF),
-       .ADDR_MATCH_PATTERN4  ( 32'hFFFF_FFFF)
+       .RDP (2) // RESPONSE FIFO DEPTH
+`endif
 
        ) u_s4 (
+`ifdef USE_POWER_PINS
+       .vccd1             (vccd1                   ),    // User area 1 1.8V supply
+       .vssd1             (vssd1                   ),    // User area 1 digital ground
+`endif
        .reset_n           ( rst_n                  ),  // Regular Reset signal
        .mclk              ( clk_i                  ),  // System clock
                                            
@@ -1258,7 +1329,7 @@ wbi_slave_port
                                        
        .wbs_cyc_o         ( s4_wb_wr.wbd_cyc       ),  // strobe/request
        .wbs_stb_o         ( s4_wb_wr.wbd_stb       ),  // strobe/request
-       .wbs_adr_o         ( s4_wb_wr.wbd_adr       ),  // address
+       .wbs_adr_o         ( s4_wb_wr.wbd_adr[10:0] ),  // address
        .wbs_we_o          ( s4_wb_wr.wbd_we        ),  // write
        .wbs_dat_o         ( s4_wb_wr.wbd_dat       ),  // data output
        .wbs_sel_o         ( s4_wb_wr.wbd_sel       ),  // byte enable
@@ -1266,6 +1337,7 @@ wbi_slave_port
        .wbs_bl_o          ( s4_wb_wr.wbd_bl        ),  // Burst Count
        .wbs_bry_o         ( s4_wb_wr.wbd_bry       ),  // Busrt WData Avialble Or Ready To accept Rdata  
 
+       .wbs_sid_i         ( s4_wb_rd.wbd_sid       ),  // Slave ID
        .wbs_dat_i         ( s4_wb_rd.wbd_dat       ),  // data input
        .wbs_ack_i         ( s4_wb_rd.wbd_ack       ),  // acknowlegement
        .wbs_lack_i        ( s4_wb_rd.wbd_lack      ),  // Last Ack
@@ -1273,30 +1345,23 @@ wbi_slave_port
 
     );
 //----------------------------------------------------------
-// S5: Pinmux
+// S5: Peri-0
 //----------------------------------------------------------
 
-wbi_slave_port 
+wbi_slave_port_s5 
      #(
+`ifndef SYNTHESIS
+       .BENB(0), // BURST ENB
+       .SAW (11),// SLAVE ADD WIDTH
        .CDP (2), // CMD FIFO DEPTH
-       .RDP (2), // RESPONSE FIFO DEPTH
-       .ADDR_MATCH_VALID1    ( 1'b1),
-       .ADDR_MATCH_MASK1     ( `USER_ADDR0_MASK_PINMUX),
-       .ADDR_MATCH_PATTERN1  ( `USER_ADDR0_PINMUX),
-
-       .ADDR_MATCH_VALID2    ( 1'b0),
-       .ADDR_MATCH_MASK2     ( 32'hFFFF_FFFF),
-       .ADDR_MATCH_PATTERN2  ( 32'hFFFF_FFFF),
-
-       .ADDR_MATCH_VALID3    ( 1'b0),
-       .ADDR_MATCH_MASK3     ( 32'hFFFF_FFFF),
-       .ADDR_MATCH_PATTERN3  ( 32'hFFFF_FFFF),
-
-       .ADDR_MATCH_VALID4    ( 1'b0),
-       .ADDR_MATCH_MASK4     ( 32'hFFFF_FFFF),
-       .ADDR_MATCH_PATTERN4  ( 32'hFFFF_FFFF)
+       .RDP (2) // RESPONSE FIFO DEPTH
+`endif
 
        ) u_s5 (
+`ifdef USE_POWER_PINS
+       .vccd1             (vccd1                   ),    // User area 1 1.8V supply
+       .vssd1             (vssd1                   ),    // User area 1 digital ground
+`endif
        .reset_n           ( rst_n                  ),  // Regular Reset signal
        .mclk              ( clk_i                  ),  // System clock
                                            
@@ -1336,7 +1401,7 @@ wbi_slave_port
                                       
        .wbs_cyc_o         ( s5_wb_wr.wbd_cyc       ),  // strobe/request
        .wbs_stb_o         ( s5_wb_wr.wbd_stb       ),  // strobe/request
-       .wbs_adr_o         ( s5_wb_wr.wbd_adr       ),  // address
+       .wbs_adr_o         ( s5_wb_wr.wbd_adr[10:0] ),  // address
        .wbs_we_o          ( s5_wb_wr.wbd_we        ),  // write
        .wbs_dat_o         ( s5_wb_wr.wbd_dat       ),  // data output
        .wbs_sel_o         ( s5_wb_wr.wbd_sel       ),  // byte enable
@@ -1344,6 +1409,7 @@ wbi_slave_port
        .wbs_bl_o          ( s5_wb_wr.wbd_bl        ),  // Burst Count
        .wbs_bry_o         ( s5_wb_wr.wbd_bry       ),  // Busrt WData Avialble Or Ready To accept Rdata  
 
+       .wbs_sid_i         ( s5_wb_rd.wbd_sid       ),  // Slave ID
        .wbs_dat_i         ( s5_wb_rd.wbd_dat       ),  // data input
        .wbs_ack_i         ( s5_wb_rd.wbd_ack       ),  // acknowlegement
        .wbs_lack_i        ( s5_wb_rd.wbd_lack      ),  // Last Ack
@@ -1351,83 +1417,6 @@ wbi_slave_port
 
     );
 
-//----------------------------------------------------------
-// S5: Peri
-//----------------------------------------------------------
-wbi_slave_port 
-     #(
-       .CDP (2), // CMD FIFO DEPTH
-       .RDP (2), // RESPONSE FIFO DEPTH
-       .ADDR_MATCH_VALID1    ( 1'b1),
-       .ADDR_MATCH_MASK1     (`USER_ADDR0_MASK_PERI),
-       .ADDR_MATCH_PATTERN1  ( `USER_ADDR0_PERI),
-
-       .ADDR_MATCH_VALID2    ( 1'b0),
-       .ADDR_MATCH_MASK2     ( 32'hFFFF_FFFF),
-       .ADDR_MATCH_PATTERN2  ( 32'hFFFF_FFFF),
-
-       .ADDR_MATCH_VALID3    ( 1'b0),
-       .ADDR_MATCH_MASK3     ( 32'hFFFF_FFFF),
-       .ADDR_MATCH_PATTERN3  ( 32'hFFFF_FFFF),
-
-       .ADDR_MATCH_VALID4    ( 1'b0),
-       .ADDR_MATCH_MASK4     ( 32'hFFFF_FFFF),
-       .ADDR_MATCH_PATTERN4  ( 32'hFFFF_FFFF)
-
-       ) u_s6 (
-       .reset_n           ( rst_n                  ),  // Regular Reset signal
-       .mclk              ( clk_i                  ),  // System clock
-                                           
-       .wbp_cmd_wrdy_o    ( s6p_cmd_ctrl.wbd_wrdy  ),  // Ready path Ready to accept the data
-       .wbp_cmd_wval_i    ( s6p_cmd_data.wbd_wval  ),
-       .wbp_cmd_adr_i     ( s6p_cmd_data.wbd_adr   ),  // address
-       .wbp_cmd_we_i      ( s6p_cmd_data.wbd_we    ),  // write
-       .wbp_cmd_dat_i     ( s6p_cmd_data.wbd_dat   ),  // data output
-       .wbp_cmd_sel_i     ( s6p_cmd_data.wbd_sel   ),  // byte enable
-       .wbp_cmd_tid_i     ( s6p_cmd_data.wbd_tid   ),
-       .wbp_cmd_bl_i      ( s6p_cmd_data.wbd_bl    ),  // Burst Count
-                                 
-       .wbp_res_rrdy_i    ( s6p_res_ctrl.wbd_rrdy  ),  // Ready path Ready to accept the data
-       .wbp_res_rval_o    ( s6p_res_data.wbd_rval  ),
-       .wbp_res_dat_o     ( s6p_res_data.wbd_dat   ),  // data input
-       .wbp_res_ack_o     ( s6p_res_data.wbd_ack   ),  // acknowlegement
-       .wbp_res_lack_o    ( s6p_res_data.wbd_lack  ),  // Last Burst access
-       .wbp_res_err_o     ( s6p_res_data.wbd_err   ),  // error
-       .wbp_res_tid_o     ( s6p_res_data.wbd_tid   ),
-                                      
-       .wbd_cmd_wrdy_i    ( s6d_cmd_ctrl.wbd_wrdy  ),  // Ready path Ready to accept the data
-       .wbd_cmd_wval_o    ( s6d_cmd_data.wbd_wval  ),
-       .wbd_cmd_adr_o     ( s6d_cmd_data.wbd_adr   ),  // address
-       .wbd_cmd_we_o      ( s6d_cmd_data.wbd_we    ),  // write
-       .wbd_cmd_dat_o     ( s6d_cmd_data.wbd_dat   ),  // data output
-       .wbd_cmd_sel_o     ( s6d_cmd_data.wbd_sel   ),  // byte enable
-       .wbd_cmd_tid_o     ( s6d_cmd_data.wbd_tid   ),
-       .wbd_cmd_bl_o      ( s6d_cmd_data.wbd_bl    ),  // Burst Count
-                                   
-       .wbd_res_rrdy_o    ( s6d_res_ctrl.wbd_rrdy  ),  // Ready path Ready to accept the data
-       .wbd_res_rval_i    ( s6d_res_data.wbd_rval  ),
-       .wbd_res_dat_i     ( s6d_res_data.wbd_dat   ),  // data input
-       .wbd_res_ack_i     ( s6d_res_data.wbd_ack   ),  // acknowlegement
-       .wbd_res_lack_i    ( s6d_res_data.wbd_lack  ),  // Last Burst access
-       .wbd_res_err_i     ( s6d_res_data.wbd_err   ),  // error
-       .wbd_res_tid_i     ( s6d_res_data.wbd_tid   ),
-                                     
-       .wbs_cyc_o         ( s6_wb_wr.wbd_cyc       ),  // strobe/request
-       .wbs_stb_o         ( s6_wb_wr.wbd_stb       ),  // strobe/request
-       .wbs_adr_o         ( s6_wb_wr.wbd_adr       ),  // address
-       .wbs_we_o          ( s6_wb_wr.wbd_we        ),  // write
-       .wbs_dat_o         ( s6_wb_wr.wbd_dat       ),  // data output
-       .wbs_sel_o         ( s6_wb_wr.wbd_sel       ),  // byte enable
-       .wbs_tid_o         ( s6_wb_wr.wbd_tid       ),
-       .wbs_bl_o          ( s6_wb_wr.wbd_bl        ),  // Burst Count
-       .wbs_bry_o         ( s6_wb_wr.wbd_bry       ),  // Busrt WData Avialble Or Ready To accept Rdata  
-
-       .wbs_dat_i         ( s6_wb_rd.wbd_dat       ),  // data input
-       .wbs_ack_i         ( s6_wb_rd.wbd_ack       ),  // acknowlegement
-       .wbs_lack_i        ( s6_wb_rd.wbd_lack      ),  // Last Ack
-       .wbs_err_i         ( s6_wb_rd.wbd_err       )   // error
-
-    );
 
 endmodule
 

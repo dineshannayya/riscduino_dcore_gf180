@@ -77,6 +77,7 @@
 ////    1.0 - 5 Mar 2023, Dinesh A                                ////
 ////          A. Riscv Tap access integration                     ////
 //////////////////////////////////////////////////////////////////////
+`include "user_reg_map.v"
 `include "user_params.svh"
 module pinmux_top (
                     `ifdef USE_POWER_PINS
@@ -136,8 +137,10 @@ module pinmux_top (
                        input logic [3:0]       reg_be,
 
                        // Outputs
+                       output logic [3:0]      reg_sid,
                        output logic [31:0]     reg_rdata,
                        output logic            reg_ack,
+                       output logic            reg_err,
 
 		      // Risc configuration
                        output logic [31:0]     irq_lines,
@@ -285,6 +288,8 @@ reg [1:0]     ext_intr_in;    // External PAD level interrupt
 
 assign      pinmux_debug = '0; // Todo: Need to fix
 
+assign      reg_sid = `WBI_SID_PINMUX;
+assign      reg_err = 1'b0;
 
 //----------------------------------------
 //  Register Response Path Mux

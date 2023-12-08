@@ -14,6 +14,11 @@ set_timing_derate -late [expr {1+$::env(SYNTH_TIMING_DERATE)}]
 
 #set_dont_touch { u_skew_core_clk.* }
 
+### ClkSkew Adjust
+set_case_analysis 0 [get_ports {cfg_ccska[0]}]
+set_case_analysis 0 [get_ports {cfg_ccska[1]}]
+set_case_analysis 0 [get_ports {cfg_ccska[2]}]
+set_case_analysis 0 [get_ports {cfg_ccska[3]}]
 
 
 
