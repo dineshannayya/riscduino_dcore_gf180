@@ -117,7 +117,7 @@ module wbi_stagging
 //----------------------------------------
 logic wbd_cmd_hold;
 
-assign wbp_cmd_wrdy_o = (wbd_cmd_hold == 0) || (wbd_cmd_wrdy_i && wbd_cmd_wval_o);
+assign wbp_cmd_wrdy_o = (wbd_cmd_hold == 0);
 assign wbd_cmd_wval_o = (wbd_cmd_hold == 1);
 
 always @ (posedge mclk or negedge reset_n)
