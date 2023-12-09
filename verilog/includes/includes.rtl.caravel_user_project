@@ -93,12 +93,18 @@ $(USER_PROJECT_VERILOG)/rtl/user_reg_map.v
 
 
 -v $(USER_PROJECT_VERILOG)/rtl/wb_interconnect/src/wbi_top.sv
--v $(USER_PROJECT_VERILOG)/rtl/wb_interconnect/src/wbi_master_port_left.sv
--v $(USER_PROJECT_VERILOG)/rtl/wb_interconnect/src/wbi_master_port_right.sv
+-v $(USER_PROJECT_VERILOG)/rtl/wb_interconnect/src/wbi_master_port_m0.sv
+-v $(USER_PROJECT_VERILOG)/rtl/wb_interconnect/src/wbi_master_port_m1.sv
+-v $(USER_PROJECT_VERILOG)/rtl/wb_interconnect/src/wbi_master_port_m2.sv
+-v $(USER_PROJECT_VERILOG)/rtl/wb_interconnect/src/wbi_master_port_m3.sv
 -v $(USER_PROJECT_VERILOG)/rtl/wb_interconnect/src/wbi_arb2.sv
 -v $(USER_PROJECT_VERILOG)/rtl/wb_interconnect/src/wbi_master_node.sv
--v $(USER_PROJECT_VERILOG)/rtl/wb_interconnect/src/wbi_slave_port.sv
--v $(USER_PROJECT_VERILOG)/rtl/wb_interconnect/src/wbi_slave_port_saw11.sv
+-v $(USER_PROJECT_VERILOG)/rtl/wb_interconnect/src/wbi_slave_port_s0.sv
+-v $(USER_PROJECT_VERILOG)/rtl/wb_interconnect/src/wbi_slave_port_s1.sv
+-v $(USER_PROJECT_VERILOG)/rtl/wb_interconnect/src/wbi_slave_port_s2.sv
+-v $(USER_PROJECT_VERILOG)/rtl/wb_interconnect/src/wbi_slave_port_s3.sv
+-v $(USER_PROJECT_VERILOG)/rtl/wb_interconnect/src/wbi_slave_port_s4.sv
+-v $(USER_PROJECT_VERILOG)/rtl/wb_interconnect/src/wbi_slave_port_s5.sv
 -v $(USER_PROJECT_VERILOG)/rtl/wb_interconnect/src/wbi_slave_node.sv
 -v $(USER_PROJECT_VERILOG)/rtl/wb_interconnect/src/wbi_stagging.sv
 

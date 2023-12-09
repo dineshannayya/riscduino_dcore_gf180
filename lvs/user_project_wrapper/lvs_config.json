@@ -22,7 +22,25 @@
         "$PDK_ROOT/$PDK/libs.ref/gf180mcu_fd_sc_mcu7t5v0/spice/gf180mcu_fd_sc_mcu7t5v0.spice"
     ],
     "LVS_VERILOG_FILES": [
-        "$UPRJ_ROOT/verilog/gl/user_proj_example.v",
+	    "$UPRJ_ROOT/verilog/gl/sspi_i2c_wrapper.v",
+	    "$UPRJ_ROOT/verilog/gl/uart_wrapper.v",
+	    "$UPRJ_ROOT/verilog/gl/qspim_top.v",
+	    "$UPRJ_ROOT/verilog/gl/usb_wrapper.v",
+	    "$UPRJ_ROOT/verilog/gl/wbi_master_port_m0.v",
+	    "$UPRJ_ROOT/verilog/gl/wbi_master_port_m1.v",
+	    "$UPRJ_ROOT/verilog/gl/wbi_master_port_m2.v",
+	    "$UPRJ_ROOT/verilog/gl/wbi_master_port_m3.v",
+	    "$UPRJ_ROOT/verilog/gl/wbi_slave_port_s0.v",
+	    "$UPRJ_ROOT/verilog/gl/wbi_slave_port_s1.v",
+	    "$UPRJ_ROOT/verilog/gl/wbi_slave_port_s2.v",
+	    "$UPRJ_ROOT/verilog/gl/wbi_slave_port_s3.v",
+	    "$UPRJ_ROOT/verilog/gl/wbi_slave_port_s4.v",
+	    "$UPRJ_ROOT/verilog/gl/wbi_slave_port_s5.v",
+	    "$UPRJ_ROOT/verilog/gl/pinmux_top.v",
+	    "$UPRJ_ROOT/verilog/gl/peri_wrapper0.v",
+	    "$UPRJ_ROOT/verilog/gl/wb_host.v",
+	    "$UPRJ_ROOT/verilog/gl/ycr_core_top.v",
+	    "$UPRJ_ROOT/verilog/gl/ycr_iconnect.v",
         "$UPRJ_ROOT/verilog/gl/$TOP_SOURCE.v"
     ],
     "LAYOUT_FILE": "$UPRJ_ROOT/gds/$TOP_LAYOUT.gds"

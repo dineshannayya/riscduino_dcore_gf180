@@ -59,7 +59,6 @@ set ::env(VERILOG_FILES_BLACKBOX) "\
 	    $::env(DESIGN_DIR)/../../verilog/gl/wbi_master_port_m1.v \
 	    $::env(DESIGN_DIR)/../../verilog/gl/wbi_master_port_m2.v \
 	    $::env(DESIGN_DIR)/../../verilog/gl/wbi_master_port_m3.v \
-	    $::env(DESIGN_DIR)/../../verilog/gl/wbi_slave_port.v \
 	    $::env(DESIGN_DIR)/../../verilog/gl/wbi_slave_port_s0.v \
 	    $::env(DESIGN_DIR)/../../verilog/gl/wbi_slave_port_s1.v \
 	    $::env(DESIGN_DIR)/../../verilog/gl/wbi_slave_port_s2.v \
@@ -84,7 +83,6 @@ set ::env(EXTRA_LEFS) "\
 	$lef_root/wbi_master_port_m1.lef \
 	$lef_root/wbi_master_port_m2.lef \
 	$lef_root/wbi_master_port_m3.lef \
-	$lef_root/wbi_slave_port.lef \
 	$lef_root/wbi_slave_port_s0.lef \
 	$lef_root/wbi_slave_port_s1.lef \
 	$lef_root/wbi_slave_port_s2.lef \
@@ -107,7 +105,6 @@ set ::env(EXTRA_GDS_FILES) "\
 	$gds_root/wbi_master_port_m1.gds \
 	$gds_root/wbi_master_port_m2.gds \
 	$gds_root/wbi_master_port_m3.gds \
-	$gds_root/wbi_slave_port.gds \
 	$gds_root/wbi_slave_port_s0.gds \
 	$gds_root/wbi_slave_port_s1.gds \
 	$gds_root/wbi_slave_port_s2.gds \
@@ -203,6 +200,9 @@ set ::env(FP_PDN_MACRO_HOOKS) " \
 
 set ::env(RUN_CTS) {0}
 set ::env(RUN_CVC) {0}
+
+#Use GDS for SPEF extraction
+set ::env(MAGIC_EXT_USE_GDS) "1"
 
 # The following is because there are no std cells in the example wrapper project.
 set ::env(PL_RANDOM_GLB_PLACEMENT) 1

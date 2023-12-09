@@ -80,7 +80,7 @@ set ::env(DIE_AREA) "0 0 750 750"
 #	                met4  0 0 450 550"
 
 set ::env(PL_TIME_DRIVEN) 1
-set ::env(PL_TARGET_DENSITY) "0.58"
+set ::env(PL_TARGET_DENSITY) "0.56"
 set ::env(GPL_CELL_PADDING) "2"
 
 # If you're going to use multiple power domains, then keep this disabled.

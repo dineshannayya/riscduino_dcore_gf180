@@ -19,7 +19,7 @@
 .SUFFIXES:
 .SILENT: clean all
 
-PATTERNS = user_gpio user_i2cm user_qspi user_sspi user_usb user_uart
+PATTERNS = user_gpio user_i2cm user_qspi user_sspi user_usb user_uart arduino_risc_boot
 
 all:  ${PATTERNS}
 	echo "################# RTL Test case Summary #####################" > regression.rpt

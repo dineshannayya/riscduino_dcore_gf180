@@ -58,11 +58,14 @@ module ycr_pipe_mprf (
     output  logic [`YCR_XLEN-1:0]              mprf2exu_rs1_data_o,        // MPRF rs1 read data
     input   logic [`YCR_MPRF_AWIDTH-1:0]       exu2mprf_rs2_addr_i,        // MPRF rs2 read address
     output  logic [`YCR_XLEN-1:0]              mprf2exu_rs2_data_o,        // MPRF rs2 read data
-    input   logic                               exu2mprf_w_req_i,           // MPRF write request
+    input   logic                              exu2mprf_w_req_i,           // MPRF write request
     input   logic [`YCR_MPRF_AWIDTH-1:0]       exu2mprf_rd_addr_i,         // MPRF rd write address
     input   logic [`YCR_XLEN-1:0]              exu2mprf_rd_data_i,         // MPRF rd write data
 
-    output  logic [`YCR_XLEN-1:0]              func_return_val    // Debug Purpose
+    output  logic [`YCR_XLEN-1:0]              func_return_val ,     // Debug Purpose
+    output  logic [`YCR_XLEN-1:0]              ret_addr ,            // Debug Purpose
+    output  logic [`YCR_XLEN-1:0]              sp_ptr ,              // Debug Purpose
+    output  logic [`YCR_XLEN-1:0]              gp_ptr                // Debug Purpose
 );
 
 //-------------------------------------------------------------------------------
@@ -123,8 +126,11 @@ logic   [`YCR_XLEN-1:0]    mprf_int2  [1:`YCR_MPRF_SIZE-1];
 logic [`YCR_XLEN-1:0]      mprf_int [1:`YCR_MPRF_SIZE-1];
 `endif
 
-// Location[0] hold the function return value
+// Debug signal
 assign  func_return_val = mprf_int[10];
+assign  ret_addr       = mprf_int[1]; // Return Address
+assign  sp_ptr         = mprf_int[2]; // Stack pointer
+assign  gp_ptr         = mprf_int[3]; // Global pointer
 
 //------------------------------------------------------------------------------
 // MPRF control logic
