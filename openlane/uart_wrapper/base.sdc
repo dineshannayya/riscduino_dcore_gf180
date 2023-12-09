@@ -7,8 +7,9 @@ current_design uart_i2c_usb_spi_top
 # Timing Constraints
 ###############################################################################
 create_clock -name app_clk -period 10.0000 [get_ports {app_clk}]
-create_clock -name uart0_baud_clk -period 100.0000 [get_pins {u_uart0_core.u_lineclk_buf.genblk1.u_mux/X}]
-create_clock -name uart1_baud_clk -period 100.0000 [get_pins {u_uart1_core.u_lineclk_buf.genblk1.u_mux/X}]
+create_clock -name uart0_baud_clk -period 100.0000 [get_pins {u_uart0_core.u_lineclk_buf.genblk1.u_mux/Z}]
+create_clock -name uart1_baud_clk -period 100.0000 [get_pins {u_uart1_core.u_lineclk_buf.genblk1.u_mux/Z}]
+create_clock -name uart2_baud_clk -period 100.0000 [get_pins {u_uart2_core.u_core.u_uart_clk.genblk1.u_mux/Z}]
 
 set_clock_transition 0.1500 [all_clocks]
 set_clock_uncertainty -setup 0.5000 [all_clocks]
@@ -19,7 +20,9 @@ set_clock_uncertainty -hold 0.2500 [all_clocks]
 set_clock_groups -name async_clock -asynchronous \
  -group [get_clocks {app_clk}]\
  -group [get_clocks {uart0_baud_clk}]\
- -group [get_clocks {uart1_baud_clk}] -comment {Async Clock group}
+ -group [get_clocks {uart1_baud_clk}]\
+ -group [get_clocks {uart2_baud_clk}]\
+ -comment {Async Clock group}
 
 #set_dont_touch { u_skew_uart.* }
 
@@ -32,10 +35,9 @@ set_case_analysis 0 [get_ports {cfg_cska_uart[3]}]
 
 
 set_input_delay -max 6.0000 -clock [get_clocks {app_clk}] -add_delay [get_ports {uart_rstn[*]}]
-
 set_input_delay -min 1.5000 -clock [get_clocks {app_clk}] -add_delay [get_ports {uart_rstn[*]}]
 
-
+# Reg Slave I/F
 set_input_delay  -max 5.0000 -clock [get_clocks {app_clk}] -add_delay [get_ports {reg_addr[*]}]
 set_input_delay  -max 6.0000 -clock [get_clocks {app_clk}] -add_delay [get_ports {reg_be[*]}]
 set_input_delay  -max 5.7500 -clock [get_clocks {app_clk}] -add_delay [get_ports {reg_cs}]
@@ -55,11 +57,36 @@ set_output_delay -max 1.0000 -clock [get_clocks {app_clk}] -add_delay [get_ports
 set_output_delay -min 1.0000 -clock [get_clocks {app_clk}] -add_delay [get_ports {reg_ack}]
 set_output_delay -min -2.7500 -clock [get_clocks {app_clk}] -add_delay [get_ports {reg_rdata[*]}]
 
-set_multicycle_path -setup  -from [get_ports {reg_addr[*]}] -to [get_ports {reg_ack}] 2
-set_multicycle_path -setup  -from [get_ports {reg_addr[*]}] -to [get_ports {reg_rdata[*]}] 2
 
-set_multicycle_path -hold  -from [get_ports {reg_addr[*]}] -to [get_ports {reg_ack}] 1
-set_multicycle_path -hold  -from [get_ports {reg_addr[*]}] -to [get_ports {reg_rdata[*]}] 1
+
+#Wb/Master
+set_output_delay -max 6.0000 -clock [get_clocks {app_clk}] -add_delay [get_ports {wbm_uart_cyc_o}]
+set_output_delay -max 6.0000 -clock [get_clocks {app_clk}] -add_delay [get_ports {wbm_uart_stb_o}]
+set_output_delay -max 6.0000 -clock [get_clocks {app_clk}] -add_delay [get_ports {wbm_uart_adr_o[*]}]
+set_output_delay -max 6.0000 -clock [get_clocks {app_clk}] -add_delay [get_ports {wbm_uart_we_o}]
+set_output_delay -max 6.0000 -clock [get_clocks {app_clk}] -add_delay [get_ports {wbm_uart_dat_o[*]}]
+set_output_delay -max 6.0000 -clock [get_clocks {app_clk}] -add_delay [get_ports {wbm_uart_sel_o[*]}]
+set_output_delay -max 6.0000 -clock [get_clocks {app_clk}] -add_delay [get_ports {wbm_uart_mid_o[*]}]
+set_output_delay -max 6.0000 -clock [get_clocks {app_clk}] -add_delay [get_ports {wbm_uart_bry_o}]
+set_output_delay -max 6.0000 -clock [get_clocks {app_clk}] -add_delay [get_ports {wbm_uart_bl_o[*]}]
+
+set_output_delay -min -1.0000 -clock [get_clocks {app_clk}] -add_delay [get_ports {wbm_uart_cyc_o}]
+set_output_delay -min -1.0000 -clock [get_clocks {app_clk}] -add_delay [get_ports {wbm_uart_stb_o}]
+set_output_delay -min -1.0000 -clock [get_clocks {app_clk}] -add_delay [get_ports {wbm_uart_adr_o[*]}]
+set_output_delay -min -1.0000 -clock [get_clocks {app_clk}] -add_delay [get_ports {wbm_uart_we_o}]
+set_output_delay -min -1.0000 -clock [get_clocks {app_clk}] -add_delay [get_ports {wbm_uart_dat_o[*]}]
+set_output_delay -min -1.0000 -clock [get_clocks {app_clk}] -add_delay [get_ports {wbm_uart_sel_o[*]}]
+set_output_delay -min -1.0000 -clock [get_clocks {app_clk}] -add_delay [get_ports {wbm_uart_mid_o[*]}]
+set_output_delay -min -1.0000 -clock [get_clocks {app_clk}] -add_delay [get_ports {wbm_uart_bry_o}]
+set_output_delay -min -1.0000 -clock [get_clocks {app_clk}] -add_delay [get_ports {wbm_uart_bl_o[*]}]
+
+set_input_delay -max 6.0000 -clock [get_clocks {app_clk}] -add_delay [get_ports {wbm_uart_dat_i[*]}]
+set_input_delay -max 6.0000 -clock [get_clocks {app_clk}] -add_delay [get_ports {wbm_uart_ack_i}]
+set_input_delay -max 6.0000 -clock [get_clocks {app_clk}] -add_delay [get_ports {wbm_uart_err_i}]
+
+set_input_delay -min 1.0000 -clock [get_clocks {app_clk}] -add_delay [get_ports {wbm_uart_dat_i[*]}]
+set_input_delay -min 1.0000 -clock [get_clocks {app_clk}] -add_delay [get_ports {wbm_uart_ack_i}]
+set_input_delay -min 1.0000 -clock [get_clocks {app_clk}] -add_delay [get_ports {wbm_uart_err_i}]
 
 ###############################################################################
 # Environment

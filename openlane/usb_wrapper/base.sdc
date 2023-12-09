@@ -7,7 +7,7 @@ current_design uart_i2c_usb_spi_top
 # Timing Constraints
 ###############################################################################
 create_clock -name app_clk -period 10.0000 [get_ports {app_clk}]
-create_clock -name usb_clk -period 100.0000 [get_ports {usb_clk}]
+create_clock -name usb_clk -period 20.0000 [get_ports {usb_clk}]
 
 set_clock_transition 0.1500 [all_clocks]
 set_clock_uncertainty -setup 0.5000 [all_clocks]
